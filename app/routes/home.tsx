@@ -273,9 +273,20 @@ export default function Home() {
       <Container sx={{ alignSelf: "center" }}>
         <Stack spacing={2}>
           <Typography variant="h4">TCGplayer Iventory Pricing Tool</Typography>
-          <Button variant="outlined" onClick={handleHelpDialogOpen}>
-            Help
-          </Button>
+          <Stack spacing={2} direction="row">
+            <Button variant="outlined" onClick={handleHelpDialogOpen}>
+              View Script Help
+            </Button>
+            <Button
+              variant="outlined"
+              component="a"
+              href="/inventory-pricing-tool-guide.gif"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View Workflow Guide
+            </Button>
+          </Stack>
           <TextField
             label="Calculation Script"
             spellCheck="false"
