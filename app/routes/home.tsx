@@ -78,7 +78,14 @@ const calculateNewPrice = (
   tcgMarketPrice: number,
   tcgLowPriceWithShipping: number,
   tcgLowPrice: number,
-  tcgMarketPlacePrice: number
+  tcgMarketPlacePrice: number,
+  totalQuantity: number,
+  condition: string,
+  productName: string,
+  rarity: string,
+  number: string,
+  setName: string,
+  productLine: string
 ): number => {
   const bestLowPrice =
     tcgLowPriceWithShipping > 4.99
@@ -91,6 +98,13 @@ const calculateNewPrice = (
       "lp",
       "mpp",
       "blp",
+      "q",
+      "c",
+      "p",
+      "r",
+      "n",
+      "s",
+      "l",
       calculationScript
     );
     return func(
@@ -98,7 +112,14 @@ const calculateNewPrice = (
       tcgLowPriceWithShipping,
       tcgLowPrice,
       tcgMarketPlacePrice,
-      bestLowPrice
+      bestLowPrice,
+      totalQuantity,
+      condition,
+      productName,
+      rarity,
+      number,
+      setName,
+      productLine
     );
   } catch (error) {
     console.error("Error in calculation script:", error);
@@ -113,7 +134,14 @@ function mapNewPriceToRow(row: TCGData, calculationScript: string): TCGData {
     parseFloat(row["TCG Market Price"]),
     parseFloat(row["TCG Low Price With Shipping"]),
     parseFloat(row["TCG Low Price"]),
-    oldPrice
+    oldPrice,
+    parseFloat(row["Total Quantity"]),
+    row["Condition"],
+    row["Product Name"],
+    row["Rarity"],
+    row["Number"],
+    row["Set Name"],
+    row["Product Line"]
   );
 
   return {
@@ -251,48 +279,149 @@ export default function Home() {
             <DialogTitle>Calculation Script Help</DialogTitle>
             <DialogContent>
               <Typography variant="body1" gutterBottom>
+                To upload your inventory, go to the pricing tab in the seller
+                portal on TCG Player and press the "Export from Live" button to
+                download all rows. Use this file as the input for the tool.
+              </Typography>
+              <Typography variant="body1" gutterBottom>
                 You can use the calculation script to define how new prices are
                 calculated for your inventory. The script is evaluated
                 dynamically, and you can use the following variables:
               </Typography>
               <Typography component="dl" gutterBottom>
-                <Typography component="dt" variant="h6">
+                <Typography
+                  component="dt"
+                  variant="h6"
+                  style={{ fontFamily: "monospaced" }}
+                >
                   mp
                 </Typography>
-                <Typography component="dd" variant="body2">
+                <Typography component="dd" variant="body2" gutterBottom>
                   TCG Market Price
                 </Typography>
-                <Typography component="dt" variant="h6">
+                <Typography
+                  component="dt"
+                  variant="h6"
+                  style={{ fontFamily: "monospaced" }}
+                >
                   lps
                 </Typography>
-                <Typography component="dd" variant="body2">
+                <Typography component="dd" variant="body2" gutterBottom>
                   TCG Low Price With Shipping
                 </Typography>
-                <Typography component="dt" variant="h6">
+                <Typography
+                  component="dt"
+                  variant="h6"
+                  style={{ fontFamily: "monospaced" }}
+                >
                   lp
                 </Typography>
-                <Typography component="dd" variant="body2">
+                <Typography component="dd" variant="body2" gutterBottom>
                   TCG Low Price
                 </Typography>
-                <Typography component="dt" variant="h6">
+                <Typography
+                  component="dt"
+                  variant="h6"
+                  style={{ fontFamily: "monospaced" }}
+                >
                   mpp
                 </Typography>
-                <Typography component="dd" variant="body2">
+                <Typography component="dd" variant="body2" gutterBottom>
                   TCG Marketplace Price (current price)
                 </Typography>
-                <Typography component="dt" variant="h6">
-                  <strong>blp</strong>
+                <Typography
+                  component="dt"
+                  variant="h6"
+                  style={{ fontFamily: "monospaced" }}
+                >
+                  blp
                 </Typography>
-                <Typography component="dd" variant="body2">
-                  The best low price is determined by checking if the "Low Price
-                  With Shipping" (<code>lps</code>) is greater than 4.99. If it
-                  is, the <code>blp</code> is set to the value of{" "}
-                  <code>lps</code>. Otherwise, the <code>blp</code> is
-                  calculated as <code>lps - 1.31</code>.
+                <Typography component="dd" variant="body2" gutterBottom>
+                  The best low price, calculated as described in the code.
+                </Typography>
+                <Typography
+                  component="dt"
+                  variant="h6"
+                  style={{ fontFamily: "monospaced" }}
+                >
+                  q
+                </Typography>
+                <Typography component="dd" variant="body2" gutterBottom>
+                  Total Quantity
+                </Typography>
+                <Typography
+                  component="dt"
+                  variant="h6"
+                  style={{ fontFamily: "monospaced" }}
+                >
+                  c
+                </Typography>
+                <Typography component="dd" variant="body2" gutterBottom>
+                  Condition
+                </Typography>
+                <Typography
+                  component="dt"
+                  variant="h6"
+                  style={{ fontFamily: "monospaced" }}
+                >
+                  p
+                </Typography>
+                <Typography component="dd" variant="body2" gutterBottom>
+                  Product Name
+                </Typography>
+                <Typography
+                  component="dt"
+                  variant="h6"
+                  style={{ fontFamily: "monospaced" }}
+                >
+                  r
+                </Typography>
+                <Typography component="dd" variant="body2" gutterBottom>
+                  Rarity
+                </Typography>
+                <Typography
+                  component="dt"
+                  variant="h6"
+                  style={{ fontFamily: "monospaced" }}
+                >
+                  n
+                </Typography>
+                <Typography component="dd" variant="body2" gutterBottom>
+                  Number
+                </Typography>
+                <Typography
+                  component="dt"
+                  variant="h6"
+                  style={{ fontFamily: "monospaced" }}
+                >
+                  s
+                </Typography>
+                <Typography component="dd" variant="body2" gutterBottom>
+                  Set Name
+                </Typography>
+                <Typography
+                  component="dt"
+                  variant="h6"
+                  style={{ fontFamily: "monospaced" }}
+                >
+                  l
+                </Typography>
+                <Typography component="dd" variant="body2" gutterBottom>
+                  Product Line
                 </Typography>
               </Typography>
               <Typography variant="body1" gutterBottom>
                 Your script should return the new price as a number.
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                The default calculation script determines the new price by
+                applying a 15% increase to the TCG Market Price (mp) and/or the
+                TCG Low Price (lp), ensuring the result is no less than a
+                minimum floor price of $0.15. If both mp and lp are available,
+                the higher of the two adjusted prices is used. If only one of mp
+                or lp is available, the adjusted value of that price is used. If
+                neither mp nor lp is available, the current TCG Marketplace
+                Price (mpp) is returned as the fallback.
               </Typography>
             </DialogContent>
             <DialogActions>
@@ -311,7 +440,6 @@ export default function Home() {
               input: {
                 style: {
                   fontFamily: "monospace",
-                  fontSize: "0.875rem",
                 },
               },
             }}
