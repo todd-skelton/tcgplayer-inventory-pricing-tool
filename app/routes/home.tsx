@@ -1,13 +1,508 @@
 import type { Route } from "./+types/home";
-import { Welcome } from "../welcome/welcome";
+import React, { useRef, useState } from "react";
+import { useTheme } from "@mui/material/styles";
+import {
+  Container,
+  Typography,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TextField,
+  Stack,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TablePagination,
+} from "@mui/material";
+import Papa from "papaparse";
+import { useLocalStorageState } from "~/hooks/useLocalStorageState";
+
+interface TCGData {
+  "TCGplayer Id": string;
+  "Product Line": string;
+  "Set Name": string;
+  "Product Name": string;
+  Title: string;
+  Number: string;
+  Rarity: string;
+  Condition: string;
+  "TCG Market Price": string;
+  "TCG Direct Low": string;
+  "TCG Low Price With Shipping": string;
+  "TCG Low Price": string;
+  "Total Quantity": string;
+  "Add to Quantity": string;
+  "TCG Marketplace Price": string;
+  "Photo URL": string;
+  "Old Price": string;
+}
+
+const myScript = `
+if (blp && mp) { return Math.max(1.05 * blp + 0.5 * blp ** (1 / 3), mp * (80 / 85)); }
+
+if (mp) return mp * 1.25;
+
+if (blp) return 1.05 * blp + 0.5 * blp ** (1 / 3);
+
+return mpp;
+`;
+
+const defaultCalculationScript = `
+const floor = 0.15, percent = 1.15;
+
+if (mp && lp) { return Math.max(mp * percent, lp * percent, floor); }
+
+if (mp) { return Math.max(mp * percent, floor); }
+
+if (lp) { return Math.max(lp * percent, floor); }
+
+return mpp;
+`;
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
+    { title: "TCGplayer Inventory Pricing Tool" }, // Updated title
+    {
+      name: "description",
+      content: "Manage and update your TCGplayer inventory pricing.",
+    },
   ];
 }
 
+const calculateNewPrice = (
+  calculationScript: string,
+  tcgMarketPrice: number,
+  tcgLowPriceWithShipping: number,
+  tcgLowPrice: number,
+  tcgMarketPlacePrice: number
+): number => {
+  const bestLowPrice =
+    tcgLowPriceWithShipping > 4.99
+      ? tcgLowPriceWithShipping
+      : tcgLowPriceWithShipping - 1.31;
+  try {
+    const func = new Function(
+      "mp",
+      "lps",
+      "lp",
+      "mpp",
+      "blp",
+      calculationScript
+    );
+    return func(
+      tcgMarketPrice,
+      tcgLowPriceWithShipping,
+      tcgLowPrice,
+      tcgMarketPlacePrice,
+      bestLowPrice
+    );
+  } catch (error) {
+    console.error("Error in calculation script:", error);
+    return NaN;
+  }
+};
+
+function mapNewPriceToRow(row: TCGData, calculationScript: string): TCGData {
+  const oldPrice = parseFloat(row["TCG Marketplace Price"]);
+  const newPrice = calculateNewPrice(
+    calculationScript,
+    parseFloat(row["TCG Market Price"]),
+    parseFloat(row["TCG Low Price With Shipping"]),
+    parseFloat(row["TCG Low Price"]),
+    oldPrice
+  );
+
+  return {
+    ...row,
+    "Old Price": oldPrice.toFixed(2) || "",
+    "TCG Marketplace Price": newPrice?.toFixed(2) || "",
+  };
+}
+
 export default function Home() {
-  return <Welcome />;
+  const theme = useTheme();
+  const [data, setData] = useState<TCGData[]>([]);
+  const [calculationScript, setCalculationScript] =
+    useLocalStorageState<string>("calculationScript", defaultCalculationScript);
+  const [helpDialogOpen, setHelpDialogOpen] = useState(false);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useLocalStorageState(
+    "rowsPerPage",
+    250
+  );
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const handleHelpDialogOpen = () => {
+    setHelpDialogOpen(true);
+  };
+
+  const handleHelpDialogClose = () => {
+    setHelpDialogOpen(false);
+  };
+
+  const handleClearDataset = () => {
+    setData([]);
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const newData: TCGData[] = [];
+      Papa.parse<TCGData>(file, {
+        header: true,
+        skipEmptyLines: true,
+        step: (row) => {
+          const parsedRow = row.data;
+          if (parsedRow["Total Quantity"] !== "0") {
+            newData.push(
+              mapNewPriceToRow(
+                parsedRow,
+                calculationScript || defaultCalculationScript
+              )
+            );
+          }
+        },
+        complete: () => {
+          setData(newData);
+          if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+          }
+        },
+      });
+    }
+  };
+
+  const calculateTotals = () => {
+    const totals = {
+      totalQuantity: 0,
+      tcgMarketPrice: 0,
+      tcgLowPriceWithShipping: 0,
+      tcgLowPrice: 0,
+      tcgMarketplacePrice: 0,
+      tcgOldPrice: 0,
+      totalChange: 0, // Add totalChange
+    };
+
+    data.forEach((row) => {
+      const quantity = parseFloat(row["Total Quantity"]) || 0;
+      totals.totalQuantity += quantity;
+      totals.tcgMarketPrice +=
+        quantity * parseFloat(row["TCG Market Price"]) || 0;
+      totals.tcgLowPriceWithShipping +=
+        quantity * parseFloat(row["TCG Low Price With Shipping"]) || 0;
+      totals.tcgLowPrice += quantity * parseFloat(row["TCG Low Price"]) || 0;
+      totals.tcgMarketplacePrice +=
+        quantity * parseFloat(row["TCG Marketplace Price"]) || 0;
+      totals.tcgOldPrice += quantity * parseFloat(row["Old Price"]) || 0;
+    });
+
+    // Calculate totalChange
+    totals.totalChange = totals.tcgMarketplacePrice - totals.tcgOldPrice;
+
+    return totals;
+  };
+
+  const totals = React.useMemo(() => calculateTotals(), [data]);
+
+  const handleDownloadCSV = () => {
+    const filteredData = data.map(({ "Old Price": _, ...rest }) => rest); // Remove "Old Price"
+    const csv = Papa.unparse(filteredData);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `tcgplayer_pricing_update_${new Date()
+      .toISOString()
+      .replace(/[:T-]/g, ".")}.csv`;
+    link.click();
+  };
+
+  const currencyFormatter = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  });
+
+  return (
+    <>
+      <Container>
+        <Stack spacing={2}>
+          <Typography variant="h4" gutterBottom>
+            TCGplayer Iventory Pricing Tool
+          </Typography>
+          <Button variant="outlined" onClick={handleHelpDialogOpen}>
+            Help
+          </Button>
+          <Dialog open={helpDialogOpen} onClose={handleHelpDialogClose}>
+            <DialogTitle>Calculation Script Help</DialogTitle>
+            <DialogContent>
+              <Typography variant="body1" gutterBottom>
+                You can use the calculation script to define how new prices are
+                calculated for your inventory. The script is evaluated
+                dynamically, and you can use the following variables:
+              </Typography>
+              <Typography component="dl" gutterBottom>
+                <Typography component="dt" variant="h6">
+                  mp
+                </Typography>
+                <Typography component="dd" variant="body2">
+                  TCG Market Price
+                </Typography>
+                <Typography component="dt" variant="h6">
+                  lps
+                </Typography>
+                <Typography component="dd" variant="body2">
+                  TCG Low Price With Shipping
+                </Typography>
+                <Typography component="dt" variant="h6">
+                  lp
+                </Typography>
+                <Typography component="dd" variant="body2">
+                  TCG Low Price
+                </Typography>
+                <Typography component="dt" variant="h6">
+                  mpp
+                </Typography>
+                <Typography component="dd" variant="body2">
+                  TCG Marketplace Price (current price)
+                </Typography>
+                <Typography component="dt" variant="h6">
+                  <strong>blp</strong>
+                </Typography>
+                <Typography component="dd" variant="body2">
+                  The best low price is determined by checking if the "Low Price
+                  With Shipping" (<code>lps</code>) is greater than 4.99. If it
+                  is, the <code>blp</code> is set to the value of{" "}
+                  <code>lps</code>. Otherwise, the <code>blp</code> is
+                  calculated as <code>lps - 1.31</code>.
+                </Typography>
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                Your script should return the new price as a number.
+              </Typography>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleHelpDialogClose} color="primary">
+                Close
+              </Button>
+            </DialogActions>
+          </Dialog>
+          <TextField
+            label="Calculation Script"
+            spellCheck="false"
+            slotProps={{
+              inputLabel: {
+                shrink: true,
+              },
+              input: {
+                style: {
+                  fontFamily: "monospace",
+                  fontSize: "0.875rem",
+                },
+              },
+            }}
+            placeholder="Enter your calculation script here"
+            multiline
+            fullWidth
+            value={calculationScript}
+            onChange={(e) => setCalculationScript(e.target.value)}
+            variant="outlined"
+            style={{ marginBottom: "20px" }}
+            onInput={(e) => {
+              const target = e.target as HTMLTextAreaElement;
+              target.style.height = "auto"; // Reset height to auto to calculate the new height
+              target.style.height = `${target.scrollHeight}px`; // Set height to match content
+            }}
+            disabled={data.length > 0} // Disable when data is loaded
+          />
+          <Stack direction="row" spacing={2}>
+            <Button variant="contained" component="label">
+              Upload Inventory Export
+              <input
+                type="file"
+                accept=".csv"
+                ref={fileInputRef}
+                hidden
+                onChange={handleFileUpload}
+              />
+            </Button>
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={handleDownloadCSV}
+            >
+              Download Update CSV
+            </Button>
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={handleClearDataset} // Call the clear dataset handler
+            >
+              Clear Dataset
+            </Button>
+          </Stack>
+        </Stack>
+      </Container>
+      {data.length > 0 && (
+        <>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Set</TableCell>
+                <TableCell>Product</TableCell>
+                <TableCell>Condition</TableCell>
+                <TableCell>TCG Market Price (mp)</TableCell>
+                <TableCell>TCG Low Price With Shipping (lps)</TableCell>
+                <TableCell>TCG Low Price (lp)</TableCell>
+                <TableCell>Total Quantity</TableCell>
+                <TableCell>TCG Marketplace Price (mpp)</TableCell>
+                <TableCell>Change</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell colSpan={3} style={{ fontWeight: "bold" }}>
+                  Totals
+                </TableCell>
+                <TableCell>
+                  {currencyFormatter.format(totals.tcgMarketPrice)}
+                </TableCell>
+                <TableCell>
+                  {currencyFormatter.format(totals.tcgLowPriceWithShipping)}
+                </TableCell>
+                <TableCell>
+                  {currencyFormatter.format(totals.tcgLowPrice)}
+                </TableCell>
+                <TableCell>{totals.totalQuantity}</TableCell>
+                <TableCell>
+                  {currencyFormatter.format(totals.tcgMarketplacePrice)}
+                </TableCell>
+                <TableCell>
+                  <Typography
+                    variant="body2"
+                    style={{
+                      color:
+                        totals.totalChange > 0
+                          ? theme.palette.success.main
+                          : theme.palette.error.main,
+                    }}
+                  >
+                    {totals.totalChange > 0
+                      ? "+" + currencyFormatter.format(totals.totalChange)
+                      : currencyFormatter.format(totals.totalChange)}{" "}
+                    (
+                    {totals.totalChange > 0
+                      ? "+" +
+                        (
+                          ((totals.tcgMarketplacePrice - totals.tcgOldPrice) /
+                            totals.tcgOldPrice) *
+                          100
+                        ).toFixed(2)
+                      : (
+                          ((totals.tcgMarketplacePrice - totals.tcgOldPrice) /
+                            totals.tcgOldPrice) *
+                          100
+                        ).toFixed(2)}
+                    %)
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {data
+                .slice(
+                  page * (rowsPerPage ?? 250),
+                  page * (rowsPerPage ?? 250) + (rowsPerPage ?? 250)
+                )
+                .map((row) => (
+                  <TableRow key={row["TCGplayer Id"]}>
+                    <TableCell>
+                      {row["Product Line"]}: {row["Set Name"]}
+                    </TableCell>
+                    <TableCell>
+                      {row["Product Name"]} - {row["Number"]} - {row["Rarity"]}
+                    </TableCell>
+                    <TableCell>{row["Condition"]}</TableCell>
+                    <TableCell>
+                      {currencyFormatter.format(
+                        parseFloat(row["TCG Market Price"])
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {currencyFormatter.format(
+                        parseFloat(row["TCG Low Price With Shipping"])
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {currencyFormatter.format(
+                        parseFloat(row["TCG Low Price"])
+                      )}
+                    </TableCell>
+                    <TableCell>{row["Total Quantity"]}</TableCell>
+                    <TableCell>
+                      {currencyFormatter.format(
+                        parseFloat(row["TCG Marketplace Price"])
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {(() => {
+                        const marketplacePrice = parseFloat(
+                          row["TCG Marketplace Price"]
+                        );
+                        const oldPrice = parseFloat(row["Old Price"]);
+                        const priceDifference = marketplacePrice - oldPrice;
+                        const percentageChange =
+                          (priceDifference / oldPrice) * 100;
+
+                        return (
+                          <Typography
+                            variant="body2"
+                            style={{
+                              color:
+                                priceDifference > 0
+                                  ? theme.palette.success.main
+                                  : theme.palette.error.main,
+                            }}
+                          >
+                            {priceDifference > 0
+                              ? "+" + currencyFormatter.format(priceDifference)
+                              : currencyFormatter.format(priceDifference)}{" "}
+                            (
+                            {priceDifference > 0
+                              ? "+" + percentageChange.toFixed(2)
+                              : percentageChange.toFixed(2)}
+                            %)
+                          </Typography>
+                        );
+                      })()}
+                    </TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+          <TablePagination
+            rowsPerPageOptions={[100, 250, 500, 1000]}
+            component="div"
+            count={data.length}
+            rowsPerPage={rowsPerPage ?? 250}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        </>
+      )}
+    </>
+  );
 }
