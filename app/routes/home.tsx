@@ -353,20 +353,32 @@ export default function Home() {
               <TableRow>
                 <TableCell colSpan={2}>Totals</TableCell>
                 <TableCell align="right">
-                  {currencyFormatter.format(totals.tcgMarketPrice)}
+                  {isNaN(totals.tcgMarketPrice)
+                    ? ""
+                    : currencyFormatter.format(totals.tcgMarketPrice)}
                 </TableCell>
                 <TableCell align="right">
-                  {currencyFormatter.format(totals.tcgLowPriceWithShipping)}
+                  {isNaN(totals.tcgLowPriceWithShipping)
+                    ? ""
+                    : currencyFormatter.format(totals.tcgLowPriceWithShipping)}
                 </TableCell>
                 <TableCell align="right">
-                  {currencyFormatter.format(totals.tcgLowPrice)}
-                </TableCell>
-                <TableCell align="right">{totals.totalQuantity}</TableCell>
-                <TableCell align="right">
-                  {currencyFormatter.format(totals.tcgCurrentPrice)}
+                  {isNaN(totals.tcgLowPrice)
+                    ? ""
+                    : currencyFormatter.format(totals.tcgLowPrice)}
                 </TableCell>
                 <TableCell align="right">
-                  {currencyFormatter.format(totals.tcgMarketplacePrice)}
+                  {isNaN(totals.totalQuantity) ? "" : totals.totalQuantity}
+                </TableCell>
+                <TableCell align="right">
+                  {isNaN(totals.tcgCurrentPrice)
+                    ? ""
+                    : currencyFormatter.format(totals.tcgCurrentPrice)}
+                </TableCell>
+                <TableCell align="right">
+                  {isNaN(totals.tcgMarketplacePrice)
+                    ? ""
+                    : currencyFormatter.format(totals.tcgMarketplacePrice)}
                 </TableCell>
                 <TableCell align="right">
                   <Typography
@@ -378,7 +390,9 @@ export default function Home() {
                           : theme.palette.error.main,
                     }}
                   >
-                    {totals.totalChange > 0
+                    {isNaN(totals.totalChange)
+                      ? ""
+                      : totals.totalChange > 0
                       ? "+" + currencyFormatter.format(totals.totalChange)
                       : currencyFormatter.format(totals.totalChange)}
                   </Typography>
@@ -393,7 +407,9 @@ export default function Home() {
                           : theme.palette.error.main,
                     }}
                   >
-                    {totals.totalChange > 0
+                    {isNaN(totals.totalChange) || totals.tcgCurrentPrice === 0
+                      ? ""
+                      : totals.totalChange > 0
                       ? "+" +
                         (
                           ((totals.tcgMarketplacePrice -
@@ -422,34 +438,56 @@ export default function Home() {
                       {row["Product Line"]}: {row["Set Name"]}
                     </TableCell>
                     <TableCell>
-                      {row["Product Name"]} - {row["Number"]} - {row["Rarity"]}{" "}
-                      - {row["Condition"]}
-                    </TableCell>
-                    <TableCell align="right">
-                      {currencyFormatter.format(
-                        parseFloat(row["TCG Market Price"])
+                      {row["Product Name"] && `${row["Product Name"]} `}
+                      {row["Number"] && `- ${row["Number"]} `}
+                      {row["Rarity"] && `- ${row["Rarity"]} `}
+                      {row["Condition"] && `- ${row["Condition"]}`}
+                      {row["Title"] && (
+                        <>
+                          <br />
+                          {row["Title"]}
+                        </>
                       )}
                     </TableCell>
                     <TableCell align="right">
-                      {currencyFormatter.format(
-                        parseFloat(row["TCG Low Price With Shipping"])
-                      )}
+                      {isNaN(parseFloat(row["TCG Market Price"]))
+                        ? ""
+                        : currencyFormatter.format(
+                            parseFloat(row["TCG Market Price"])
+                          )}
                     </TableCell>
                     <TableCell align="right">
-                      {currencyFormatter.format(
-                        parseFloat(row["TCG Low Price"])
-                      )}
-                    </TableCell>
-                    <TableCell align="right">{row["Total Quantity"]}</TableCell>
-                    <TableCell align="right">
-                      {currencyFormatter.format(
-                        parseFloat(row["Current Price"])
-                      )}
+                      {isNaN(parseFloat(row["TCG Low Price With Shipping"]))
+                        ? ""
+                        : currencyFormatter.format(
+                            parseFloat(row["TCG Low Price With Shipping"])
+                          )}
                     </TableCell>
                     <TableCell align="right">
-                      {currencyFormatter.format(
-                        parseFloat(row["TCG Marketplace Price"])
-                      )}
+                      {isNaN(parseFloat(row["TCG Low Price"]))
+                        ? ""
+                        : currencyFormatter.format(
+                            parseFloat(row["TCG Low Price"])
+                          )}
+                    </TableCell>
+                    <TableCell align="right">
+                      {isNaN(parseFloat(row["Total Quantity"]))
+                        ? ""
+                        : row["Total Quantity"]}
+                    </TableCell>
+                    <TableCell align="right">
+                      {isNaN(parseFloat(row["Current Price"]))
+                        ? ""
+                        : currencyFormatter.format(
+                            parseFloat(row["Current Price"])
+                          )}
+                    </TableCell>
+                    <TableCell align="right">
+                      {isNaN(parseFloat(row["TCG Marketplace Price"]))
+                        ? ""
+                        : currencyFormatter.format(
+                            parseFloat(row["TCG Marketplace Price"])
+                          )}
                     </TableCell>
 
                     {(() => {
@@ -472,7 +510,9 @@ export default function Home() {
                                     : theme.palette.error.main,
                               }}
                             >
-                              {priceDifference > 0
+                              {isNaN(priceDifference)
+                                ? ""
+                                : priceDifference > 0
                                 ? "+" +
                                   currencyFormatter.format(priceDifference)
                                 : currencyFormatter.format(priceDifference)}
@@ -488,7 +528,9 @@ export default function Home() {
                                     : theme.palette.error.main,
                               }}
                             >
-                              {priceDifference > 0
+                              {isNaN(priceDifference) || currentPrice === 0
+                                ? ""
+                                : priceDifference > 0
                                 ? "+" + percentageChange.toFixed(2)
                                 : percentageChange.toFixed(2)}
                               %
