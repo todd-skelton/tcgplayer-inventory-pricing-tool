@@ -348,9 +348,8 @@ export default function Home() {
                 <TableCell align="right">Qty&nbsp;(q)</TableCell>
                 <TableCell align="right">Current&nbsp;(mpp)</TableCell>
                 <TableCell align="right">New</TableCell>
-                <TableCell align="right" colSpan={2}>
-                  Change
-                </TableCell>
+                <TableCell align="right">Δ&nbsp;($)</TableCell>
+                <TableCell align="right">Δ&nbsp;(%)</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
