@@ -38,7 +38,7 @@ interface TCGData {
   "Add to Quantity": string;
   "TCG Marketplace Price": string;
   "Photo URL": string;
-  "Old Price": string;
+  "Current Price": string;
 }
 
 const myScript = `
@@ -128,13 +128,13 @@ const calculateNewPrice = (
 };
 
 function mapNewPriceToRow(row: TCGData, calculationScript: string): TCGData {
-  const oldPrice = parseFloat(row["TCG Marketplace Price"]);
+  const currentPrice = parseFloat(row["TCG Marketplace Price"]);
   const newPrice = calculateNewPrice(
     calculationScript,
     parseFloat(row["TCG Market Price"]),
     parseFloat(row["TCG Low Price With Shipping"]),
     parseFloat(row["TCG Low Price"]),
-    oldPrice,
+    currentPrice,
     parseFloat(row["Total Quantity"]),
     row["Condition"],
     row["Product Name"],
@@ -146,7 +146,7 @@ function mapNewPriceToRow(row: TCGData, calculationScript: string): TCGData {
 
   return {
     ...row,
-    "Old Price": oldPrice.toFixed(2) || "",
+    "Current Price": currentPrice.toFixed(2) || "",
     "TCG Marketplace Price": newPrice?.toFixed(2) || "",
   };
 }
@@ -222,7 +222,7 @@ export default function Home() {
       tcgLowPriceWithShipping: 0,
       tcgLowPrice: 0,
       tcgMarketplacePrice: 0,
-      tcgOldPrice: 0,
+      tcgCurrentPrice: 0,
       totalChange: 0, // Add totalChange
     };
 
@@ -236,11 +236,12 @@ export default function Home() {
       totals.tcgLowPrice += quantity * parseFloat(row["TCG Low Price"]) || 0;
       totals.tcgMarketplacePrice +=
         quantity * parseFloat(row["TCG Marketplace Price"]) || 0;
-      totals.tcgOldPrice += quantity * parseFloat(row["Old Price"]) || 0;
+      totals.tcgCurrentPrice +=
+        quantity * parseFloat(row["Current Price"]) || 0;
     });
 
     // Calculate totalChange
-    totals.totalChange = totals.tcgMarketplacePrice - totals.tcgOldPrice;
+    totals.totalChange = totals.tcgMarketplacePrice - totals.tcgCurrentPrice;
 
     return totals;
   };
@@ -248,7 +249,7 @@ export default function Home() {
   const totals = React.useMemo(() => calculateTotals(), [data]);
 
   const handleDownloadCSV = () => {
-    const filteredData = data.map(({ "Old Price": _, ...rest }) => rest); // Remove "Old Price"
+    const filteredData = data.map(({ "Current Price": _, ...rest }) => rest); // Remove "Old Price"
     const csv = Papa.unparse(filteredData);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -275,161 +276,6 @@ export default function Home() {
           <Button variant="outlined" onClick={handleHelpDialogOpen}>
             Help
           </Button>
-          <Dialog open={helpDialogOpen} onClose={handleHelpDialogClose}>
-            <DialogTitle>Calculation Script Help</DialogTitle>
-            <DialogContent>
-              <Typography variant="body1" gutterBottom>
-                To upload your inventory, go to the pricing tab in the seller
-                portal on TCG Player and press the "Export from Live" button to
-                download all rows. Use this file as the input for the tool.
-              </Typography>
-              <Typography variant="body1" gutterBottom>
-                You can use the calculation script to define how new prices are
-                calculated for your inventory. The script is evaluated
-                dynamically, and you can use the following variables:
-              </Typography>
-              <Typography component="dl" gutterBottom>
-                <Typography
-                  component="dt"
-                  variant="h6"
-                  style={{ fontFamily: "monospaced" }}
-                >
-                  mp
-                </Typography>
-                <Typography component="dd" variant="body2" gutterBottom>
-                  TCG Market Price
-                </Typography>
-                <Typography
-                  component="dt"
-                  variant="h6"
-                  style={{ fontFamily: "monospaced" }}
-                >
-                  lps
-                </Typography>
-                <Typography component="dd" variant="body2" gutterBottom>
-                  TCG Low Price With Shipping
-                </Typography>
-                <Typography
-                  component="dt"
-                  variant="h6"
-                  style={{ fontFamily: "monospaced" }}
-                >
-                  lp
-                </Typography>
-                <Typography component="dd" variant="body2" gutterBottom>
-                  TCG Low Price
-                </Typography>
-                <Typography
-                  component="dt"
-                  variant="h6"
-                  style={{ fontFamily: "monospaced" }}
-                >
-                  mpp
-                </Typography>
-                <Typography component="dd" variant="body2" gutterBottom>
-                  TCG Marketplace Price (current price)
-                </Typography>
-                <Typography
-                  component="dt"
-                  variant="h6"
-                  style={{ fontFamily: "monospaced" }}
-                >
-                  blp
-                </Typography>
-                <Typography component="dd" variant="body2" gutterBottom>
-                  The best low price, calculated as described in the code.
-                </Typography>
-                <Typography
-                  component="dt"
-                  variant="h6"
-                  style={{ fontFamily: "monospaced" }}
-                >
-                  q
-                </Typography>
-                <Typography component="dd" variant="body2" gutterBottom>
-                  Total Quantity
-                </Typography>
-                <Typography
-                  component="dt"
-                  variant="h6"
-                  style={{ fontFamily: "monospaced" }}
-                >
-                  c
-                </Typography>
-                <Typography component="dd" variant="body2" gutterBottom>
-                  Condition
-                </Typography>
-                <Typography
-                  component="dt"
-                  variant="h6"
-                  style={{ fontFamily: "monospaced" }}
-                >
-                  p
-                </Typography>
-                <Typography component="dd" variant="body2" gutterBottom>
-                  Product Name
-                </Typography>
-                <Typography
-                  component="dt"
-                  variant="h6"
-                  style={{ fontFamily: "monospaced" }}
-                >
-                  r
-                </Typography>
-                <Typography component="dd" variant="body2" gutterBottom>
-                  Rarity
-                </Typography>
-                <Typography
-                  component="dt"
-                  variant="h6"
-                  style={{ fontFamily: "monospaced" }}
-                >
-                  n
-                </Typography>
-                <Typography component="dd" variant="body2" gutterBottom>
-                  Number
-                </Typography>
-                <Typography
-                  component="dt"
-                  variant="h6"
-                  style={{ fontFamily: "monospaced" }}
-                >
-                  s
-                </Typography>
-                <Typography component="dd" variant="body2" gutterBottom>
-                  Set Name
-                </Typography>
-                <Typography
-                  component="dt"
-                  variant="h6"
-                  style={{ fontFamily: "monospaced" }}
-                >
-                  l
-                </Typography>
-                <Typography component="dd" variant="body2" gutterBottom>
-                  Product Line
-                </Typography>
-              </Typography>
-              <Typography variant="body1" gutterBottom>
-                Your script should return the new price as a number.
-              </Typography>
-              <Typography variant="body1" gutterBottom>
-                The default calculation script determines the new price by
-                applying a 15% increase to the TCG Market Price (mp) and/or the
-                TCG Low Price (lp), ensuring the result is no less than a
-                minimum floor price of $0.15. If both mp and lp are available,
-                the higher of the two adjusted prices is used. If only one of mp
-                or lp is available, the adjusted value of that price is used. If
-                neither mp nor lp is available, the current TCG Marketplace
-                Price (mpp) is returned as the fallback.
-              </Typography>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleHelpDialogClose} color="primary">
-                Close
-              </Button>
-            </DialogActions>
-          </Dialog>
           <TextField
             label="Calculation Script"
             spellCheck="false"
@@ -487,23 +333,23 @@ export default function Home() {
       </Container>
       {data.length > 0 && (
         <>
-          <Table>
+          <Table size="small" stickyHeader>
             <TableHead>
               <TableRow>
                 <TableCell>Set</TableCell>
                 <TableCell>Product</TableCell>
-                <TableCell>Condition</TableCell>
-                <TableCell>TCG Market Price (mp)</TableCell>
-                <TableCell>TCG Low Price With Shipping (lps)</TableCell>
-                <TableCell>TCG Low Price (lp)</TableCell>
-                <TableCell>Total Quantity</TableCell>
-                <TableCell>TCG Marketplace Price (mpp)</TableCell>
+                <TableCell>Market&nbsp;(mp)</TableCell>
+                <TableCell>Low+Shipping&nbsp;(lps)</TableCell>
+                <TableCell>Low&nbsp;(lp)</TableCell>
+                <TableCell>Qty&nbsp;(q)</TableCell>
+                <TableCell>Current&nbsp;(mpp)</TableCell>
+                <TableCell>New</TableCell>
                 <TableCell>Change</TableCell>
               </TableRow>
+            </TableHead>
+            <TableBody>
               <TableRow>
-                <TableCell colSpan={3} style={{ fontWeight: "bold" }}>
-                  Totals
-                </TableCell>
+                <TableCell colSpan={2}>Totals</TableCell>
                 <TableCell>
                   {currencyFormatter.format(totals.tcgMarketPrice)}
                 </TableCell>
@@ -514,6 +360,9 @@ export default function Home() {
                   {currencyFormatter.format(totals.tcgLowPrice)}
                 </TableCell>
                 <TableCell>{totals.totalQuantity}</TableCell>
+                <TableCell>
+                  {currencyFormatter.format(totals.tcgCurrentPrice)}
+                </TableCell>
                 <TableCell>
                   {currencyFormatter.format(totals.tcgMarketplacePrice)}
                 </TableCell>
@@ -534,21 +383,21 @@ export default function Home() {
                     {totals.totalChange > 0
                       ? "+" +
                         (
-                          ((totals.tcgMarketplacePrice - totals.tcgOldPrice) /
-                            totals.tcgOldPrice) *
+                          ((totals.tcgMarketplacePrice -
+                            totals.tcgCurrentPrice) /
+                            totals.tcgCurrentPrice) *
                           100
                         ).toFixed(2)
                       : (
-                          ((totals.tcgMarketplacePrice - totals.tcgOldPrice) /
-                            totals.tcgOldPrice) *
+                          ((totals.tcgMarketplacePrice -
+                            totals.tcgCurrentPrice) /
+                            totals.tcgCurrentPrice) *
                           100
                         ).toFixed(2)}
                     %)
                   </Typography>
                 </TableCell>
               </TableRow>
-            </TableHead>
-            <TableBody>
               {data
                 .slice(
                   page * (rowsPerPage ?? 250),
@@ -560,9 +409,9 @@ export default function Home() {
                       {row["Product Line"]}: {row["Set Name"]}
                     </TableCell>
                     <TableCell>
-                      {row["Product Name"]} - {row["Number"]} - {row["Rarity"]}
+                      {row["Product Name"]} - {row["Number"]} - {row["Rarity"]}{" "}
+                      - {row["Condition"]}
                     </TableCell>
-                    <TableCell>{row["Condition"]}</TableCell>
                     <TableCell>
                       {currencyFormatter.format(
                         parseFloat(row["TCG Market Price"])
@@ -581,6 +430,11 @@ export default function Home() {
                     <TableCell>{row["Total Quantity"]}</TableCell>
                     <TableCell>
                       {currencyFormatter.format(
+                        parseFloat(row["Current Price"])
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {currencyFormatter.format(
                         parseFloat(row["TCG Marketplace Price"])
                       )}
                     </TableCell>
@@ -589,10 +443,10 @@ export default function Home() {
                         const marketplacePrice = parseFloat(
                           row["TCG Marketplace Price"]
                         );
-                        const oldPrice = parseFloat(row["Old Price"]);
-                        const priceDifference = marketplacePrice - oldPrice;
+                        const currentPrice = parseFloat(row["Current Price"]);
+                        const priceDifference = marketplacePrice - currentPrice;
                         const percentageChange =
-                          (priceDifference / oldPrice) * 100;
+                          (priceDifference / currentPrice) * 100;
 
                         return (
                           <Typography
@@ -631,6 +485,161 @@ export default function Home() {
           />
         </>
       )}
+      <Dialog open={helpDialogOpen} onClose={handleHelpDialogClose}>
+        <DialogTitle>Calculation Script Help</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1" gutterBottom>
+            To upload your inventory, go to the pricing tab in the seller portal
+            on TCG Player and press the "Export from Live" button to download
+            all rows. Use this file as the input for the tool.
+          </Typography>
+          <Typography variant="body1" gutterBottom>
+            You can use the calculation script to define how new prices are
+            calculated for your inventory. The script is evaluated dynamically,
+            and you can use the following variables:
+          </Typography>
+          <Typography component="dl" gutterBottom>
+            <Typography
+              component="dt"
+              variant="h6"
+              style={{ fontFamily: "monospaced" }}
+            >
+              mp
+            </Typography>
+            <Typography component="dd" variant="body2" gutterBottom>
+              TCG Market Price
+            </Typography>
+            <Typography
+              component="dt"
+              variant="h6"
+              style={{ fontFamily: "monospaced" }}
+            >
+              lps
+            </Typography>
+            <Typography component="dd" variant="body2" gutterBottom>
+              TCG Low Price With Shipping
+            </Typography>
+            <Typography
+              component="dt"
+              variant="h6"
+              style={{ fontFamily: "monospaced" }}
+            >
+              lp
+            </Typography>
+            <Typography component="dd" variant="body2" gutterBottom>
+              TCG Low Price
+            </Typography>
+            <Typography
+              component="dt"
+              variant="h6"
+              style={{ fontFamily: "monospaced" }}
+            >
+              mpp
+            </Typography>
+            <Typography component="dd" variant="body2" gutterBottom>
+              TCG Marketplace Price (current price)
+            </Typography>
+            <Typography
+              component="dt"
+              variant="h6"
+              style={{ fontFamily: "monospaced" }}
+            >
+              blp
+            </Typography>
+            <Typography component="dd" variant="body2" gutterBottom>
+              The best low price, calculated as described in the code.
+            </Typography>
+            <Typography
+              component="dt"
+              variant="h6"
+              style={{ fontFamily: "monospaced" }}
+            >
+              q
+            </Typography>
+            <Typography component="dd" variant="body2" gutterBottom>
+              Total Quantity
+            </Typography>
+            <Typography
+              component="dt"
+              variant="h6"
+              style={{ fontFamily: "monospaced" }}
+            >
+              c
+            </Typography>
+            <Typography component="dd" variant="body2" gutterBottom>
+              Condition
+            </Typography>
+            <Typography
+              component="dt"
+              variant="h6"
+              style={{ fontFamily: "monospaced" }}
+            >
+              p
+            </Typography>
+            <Typography component="dd" variant="body2" gutterBottom>
+              Product Name
+            </Typography>
+            <Typography
+              component="dt"
+              variant="h6"
+              style={{ fontFamily: "monospaced" }}
+            >
+              r
+            </Typography>
+            <Typography component="dd" variant="body2" gutterBottom>
+              Rarity
+            </Typography>
+            <Typography
+              component="dt"
+              variant="h6"
+              style={{ fontFamily: "monospaced" }}
+            >
+              n
+            </Typography>
+            <Typography component="dd" variant="body2" gutterBottom>
+              Number
+            </Typography>
+            <Typography
+              component="dt"
+              variant="h6"
+              style={{ fontFamily: "monospaced" }}
+            >
+              s
+            </Typography>
+            <Typography component="dd" variant="body2" gutterBottom>
+              Set Name
+            </Typography>
+            <Typography
+              component="dt"
+              variant="h6"
+              style={{ fontFamily: "monospaced" }}
+            >
+              l
+            </Typography>
+            <Typography component="dd" variant="body2" gutterBottom>
+              Product Line
+            </Typography>
+          </Typography>
+          <Typography variant="body1" gutterBottom>
+            Your script should return the new price as a number.
+          </Typography>
+          <Typography variant="body1" gutterBottom>
+            The default calculation script determines the new price by applying
+            a 15% increase to the TCG Market Price (mp) and/or the TCG Low Price
+            (lp), ensuring the result is no less than a minimum floor price of
+            $0.15. If both mp and lp are available, the higher of the two
+            adjusted prices is used. If only one of mp or lp is available, the
+            adjusted value of that price is used. If neither mp nor lp is
+            available, the current TCG Marketplace Price (mpp) is returned as
+            the fallback.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleHelpDialogClose} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
