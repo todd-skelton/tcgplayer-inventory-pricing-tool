@@ -267,12 +267,10 @@ export default function Home() {
   });
 
   return (
-    <>
-      <Container>
+    <Stack spacing={2}>
+      <Container sx={{ alignSelf: "center" }}>
         <Stack spacing={2}>
-          <Typography variant="h4" gutterBottom>
-            TCGplayer Iventory Pricing Tool
-          </Typography>
+          <Typography variant="h4">TCGplayer Iventory Pricing Tool</Typography>
           <Button variant="outlined" onClick={handleHelpDialogOpen}>
             Help
           </Button>
@@ -295,7 +293,6 @@ export default function Home() {
             value={calculationScript}
             onChange={(e) => setCalculationScript(e.target.value)}
             variant="outlined"
-            style={{ marginBottom: "20px" }}
             onInput={(e) => {
               const target = e.target as HTMLTextAreaElement;
               target.style.height = "auto"; // Reset height to auto to calculate the new height
@@ -670,6 +667,6 @@ export default function Home() {
           </Button>
         </DialogActions>
       </Dialog>
-    </>
+    </Stack>
   );
 }
