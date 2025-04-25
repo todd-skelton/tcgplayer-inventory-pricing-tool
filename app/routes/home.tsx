@@ -336,37 +336,43 @@ export default function Home() {
           <Table size="small" stickyHeader>
             <TableHead>
               <TableRow>
-                <TableCell>Set</TableCell>
-                <TableCell>Product</TableCell>
-                <TableCell>Market&nbsp;(mp)</TableCell>
-                <TableCell>Low+Shipping&nbsp;(lps)</TableCell>
-                <TableCell>Low&nbsp;(lp)</TableCell>
-                <TableCell>Qty&nbsp;(q)</TableCell>
-                <TableCell>Current&nbsp;(mpp)</TableCell>
-                <TableCell>New</TableCell>
-                <TableCell>Change</TableCell>
+                <TableCell>
+                  Product&nbsp;Line&nbsp;(l):&nbsp;Set&nbsp;(s)
+                </TableCell>
+                <TableCell>
+                  Product&nbsp;(p)&nbsp;-&nbsp;Number&nbsp;(n)&nbsp;-&nbsp;Rarity&nbsp;(r)&nbsp;-&nbsp;Condition&nbsp;(c)
+                </TableCell>
+                <TableCell align="right">Market&nbsp;(mp)</TableCell>
+                <TableCell align="right">Low+Shipping&nbsp;(lps)</TableCell>
+                <TableCell align="right">Low&nbsp;(lp)</TableCell>
+                <TableCell align="right">Qty&nbsp;(q)</TableCell>
+                <TableCell align="right">Current&nbsp;(mpp)</TableCell>
+                <TableCell align="right">New</TableCell>
+                <TableCell align="right" colSpan={2}>
+                  Change
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               <TableRow>
                 <TableCell colSpan={2}>Totals</TableCell>
-                <TableCell>
+                <TableCell align="right">
                   {currencyFormatter.format(totals.tcgMarketPrice)}
                 </TableCell>
-                <TableCell>
+                <TableCell align="right">
                   {currencyFormatter.format(totals.tcgLowPriceWithShipping)}
                 </TableCell>
-                <TableCell>
+                <TableCell align="right">
                   {currencyFormatter.format(totals.tcgLowPrice)}
                 </TableCell>
-                <TableCell>{totals.totalQuantity}</TableCell>
-                <TableCell>
+                <TableCell align="right">{totals.totalQuantity}</TableCell>
+                <TableCell align="right">
                   {currencyFormatter.format(totals.tcgCurrentPrice)}
                 </TableCell>
-                <TableCell>
+                <TableCell align="right">
                   {currencyFormatter.format(totals.tcgMarketplacePrice)}
                 </TableCell>
-                <TableCell>
+                <TableCell align="right">
                   <Typography
                     variant="body2"
                     style={{
@@ -378,8 +384,19 @@ export default function Home() {
                   >
                     {totals.totalChange > 0
                       ? "+" + currencyFormatter.format(totals.totalChange)
-                      : currencyFormatter.format(totals.totalChange)}{" "}
-                    (
+                      : currencyFormatter.format(totals.totalChange)}
+                  </Typography>
+                </TableCell>
+                <TableCell align="right">
+                  <Typography
+                    variant="body2"
+                    style={{
+                      color:
+                        totals.totalChange > 0
+                          ? theme.palette.success.main
+                          : theme.palette.error.main,
+                    }}
+                  >
                     {totals.totalChange > 0
                       ? "+" +
                         (
@@ -394,7 +411,7 @@ export default function Home() {
                             totals.tcgCurrentPrice) *
                           100
                         ).toFixed(2)}
-                    %)
+                    %
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -412,64 +429,78 @@ export default function Home() {
                       {row["Product Name"]} - {row["Number"]} - {row["Rarity"]}{" "}
                       - {row["Condition"]}
                     </TableCell>
-                    <TableCell>
+                    <TableCell align="right">
                       {currencyFormatter.format(
                         parseFloat(row["TCG Market Price"])
                       )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell align="right">
                       {currencyFormatter.format(
                         parseFloat(row["TCG Low Price With Shipping"])
                       )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell align="right">
                       {currencyFormatter.format(
                         parseFloat(row["TCG Low Price"])
                       )}
                     </TableCell>
-                    <TableCell>{row["Total Quantity"]}</TableCell>
-                    <TableCell>
+                    <TableCell align="right">{row["Total Quantity"]}</TableCell>
+                    <TableCell align="right">
                       {currencyFormatter.format(
                         parseFloat(row["Current Price"])
                       )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell align="right">
                       {currencyFormatter.format(
                         parseFloat(row["TCG Marketplace Price"])
                       )}
                     </TableCell>
-                    <TableCell>
-                      {(() => {
-                        const marketplacePrice = parseFloat(
-                          row["TCG Marketplace Price"]
-                        );
-                        const currentPrice = parseFloat(row["Current Price"]);
-                        const priceDifference = marketplacePrice - currentPrice;
-                        const percentageChange =
-                          (priceDifference / currentPrice) * 100;
 
-                        return (
-                          <Typography
-                            variant="body2"
-                            style={{
-                              color:
-                                priceDifference > 0
-                                  ? theme.palette.success.main
-                                  : theme.palette.error.main,
-                            }}
-                          >
-                            {priceDifference > 0
-                              ? "+" + currencyFormatter.format(priceDifference)
-                              : currencyFormatter.format(priceDifference)}{" "}
-                            (
-                            {priceDifference > 0
-                              ? "+" + percentageChange.toFixed(2)
-                              : percentageChange.toFixed(2)}
-                            %)
-                          </Typography>
-                        );
-                      })()}
-                    </TableCell>
+                    {(() => {
+                      const marketplacePrice = parseFloat(
+                        row["TCG Marketplace Price"]
+                      );
+                      const currentPrice = parseFloat(row["Current Price"]);
+                      const priceDifference = marketplacePrice - currentPrice;
+                      const percentageChange =
+                        (priceDifference / currentPrice) * 100;
+                      return (
+                        <>
+                          <TableCell align="right">
+                            <Typography
+                              variant="body2"
+                              style={{
+                                color:
+                                  priceDifference > 0
+                                    ? theme.palette.success.main
+                                    : theme.palette.error.main,
+                              }}
+                            >
+                              {priceDifference > 0
+                                ? "+" +
+                                  currencyFormatter.format(priceDifference)
+                                : currencyFormatter.format(priceDifference)}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="right">
+                            <Typography
+                              variant="body2"
+                              style={{
+                                color:
+                                  priceDifference > 0
+                                    ? theme.palette.success.main
+                                    : theme.palette.error.main,
+                              }}
+                            >
+                              {priceDifference > 0
+                                ? "+" + percentageChange.toFixed(2)
+                                : percentageChange.toFixed(2)}
+                              %
+                            </Typography>
+                          </TableCell>
+                        </>
+                      );
+                    })()}
                   </TableRow>
                 ))}
             </TableBody>
