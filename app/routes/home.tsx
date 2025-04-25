@@ -17,7 +17,9 @@ import {
   DialogContent,
   DialogActions,
   TablePagination,
+  Tooltip,
 } from "@mui/material";
+import ImageIcon from "@mui/icons-material/Image";
 import Papa from "papaparse";
 import { useLocalStorageState } from "~/hooks/useLocalStorageState";
 
@@ -339,48 +341,49 @@ export default function Home() {
                 <TableCell>
                   Product&nbsp;(p)&nbsp;-&nbsp;Number&nbsp;(n)&nbsp;-&nbsp;Rarity&nbsp;(r)&nbsp;-&nbsp;Condition&nbsp;(c)
                 </TableCell>
-                <TableCell align="right">Market&nbsp;(mp)</TableCell>
-                <TableCell align="right">Low+Shipping&nbsp;(lps)</TableCell>
-                <TableCell align="right">Low&nbsp;(lp)</TableCell>
-                <TableCell align="right">Qty&nbsp;(q)</TableCell>
-                <TableCell align="right">Current&nbsp;(mpp)</TableCell>
-                <TableCell align="right">New</TableCell>
-                <TableCell align="right">Δ&nbsp;($)</TableCell>
-                <TableCell align="right">Δ&nbsp;(%)</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              <TableRow>
-                <TableCell colSpan={2}>Totals</TableCell>
-                <TableCell align="right">
+                <TableCell align="right" sx={{ width: "0%" }}>
+                  Market&nbsp;(mp)
+                  <br />
                   {isNaN(totals.tcgMarketPrice)
                     ? ""
                     : currencyFormatter.format(totals.tcgMarketPrice)}
                 </TableCell>
-                <TableCell align="right">
+                <TableCell align="right" sx={{ width: "0%" }}>
+                  Low+Shipping&nbsp;(lps)
+                  <br />
                   {isNaN(totals.tcgLowPriceWithShipping)
                     ? ""
                     : currencyFormatter.format(totals.tcgLowPriceWithShipping)}
                 </TableCell>
-                <TableCell align="right">
+                <TableCell align="right" sx={{ width: "0%" }}>
+                  Low&nbsp;(lp)
+                  <br />
                   {isNaN(totals.tcgLowPrice)
                     ? ""
                     : currencyFormatter.format(totals.tcgLowPrice)}
                 </TableCell>
-                <TableCell align="right">
+                <TableCell align="right" sx={{ width: "0%" }}>
+                  Qty&nbsp;(q)
+                  <br />
                   {isNaN(totals.totalQuantity) ? "" : totals.totalQuantity}
                 </TableCell>
-                <TableCell align="right">
+                <TableCell align="right" sx={{ width: "0%" }}>
+                  Current&nbsp;(mpp)
+                  <br />
                   {isNaN(totals.tcgCurrentPrice)
                     ? ""
                     : currencyFormatter.format(totals.tcgCurrentPrice)}
                 </TableCell>
-                <TableCell align="right">
+                <TableCell align="right" sx={{ width: "0%" }}>
+                  New
+                  <br />
                   {isNaN(totals.tcgMarketplacePrice)
                     ? ""
                     : currencyFormatter.format(totals.tcgMarketplacePrice)}
                 </TableCell>
-                <TableCell align="right">
+                <TableCell align="right" sx={{ width: "0%" }}>
+                  Δ&nbsp;($)
+                  <br />
                   <Typography
                     variant="body2"
                     style={{
@@ -397,7 +400,9 @@ export default function Home() {
                       : currencyFormatter.format(totals.totalChange)}
                   </Typography>
                 </TableCell>
-                <TableCell align="right">
+                <TableCell align="right" sx={{ width: "0%" }}>
+                  Δ&nbsp;(%)
+                  <br />
                   <Typography
                     variant="body2"
                     style={{
@@ -427,6 +432,8 @@ export default function Home() {
                   </Typography>
                 </TableCell>
               </TableRow>
+            </TableHead>
+            <TableBody>
               {data
                 .slice(
                   page * (rowsPerPage ?? 250),
@@ -443,10 +450,15 @@ export default function Home() {
                       {row["Rarity"] && `- ${row["Rarity"]} `}
                       {row["Condition"] && `- ${row["Condition"]}`}
                       {row["Title"] && (
-                        <>
-                          <br />
-                          {row["Title"]}
-                        </>
+                        <Tooltip title={row["Title"]} arrow>
+                          <ImageIcon
+                            sx={{
+                              fontSize: "1rem",
+                              verticalAlign: "middle",
+                              marginLeft: "0.25rem",
+                            }}
+                          />
+                        </Tooltip>
                       )}
                     </TableCell>
                     <TableCell align="right">
