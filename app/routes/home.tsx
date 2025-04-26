@@ -41,6 +41,8 @@ interface TCGData {
   "TCG Marketplace Price": string;
   "Photo URL": string;
   "Current Price": string;
+  ParsedCondition: string;
+  Printing: string;
 }
 
 const myScript = `
@@ -146,10 +148,26 @@ function mapNewPriceToRow(row: TCGData, calculationScript: string): TCGData {
     row["Product Line"]
   );
 
+  const validConditions = [
+    "Near Mint",
+    "Lightly Played",
+    "Moderately Played",
+    "Heavily Played",
+    "Damaged",
+    "Unopened",
+  ];
+
+  const condition =
+    validConditions.find((c) => row["Condition"].startsWith(c)) || "Unknown";
+
+  const printing = row["Condition"].substring(condition.length).trim();
+
   return {
     ...row,
     "Current Price": currentPrice.toFixed(2) || "",
     "TCG Marketplace Price": newPrice?.toFixed(2) || "",
+    ParsedCondition: condition,
+    Printing: printing,
   };
 }
 
@@ -198,7 +216,10 @@ export default function Home() {
         skipEmptyLines: true,
         step: (row) => {
           const parsedRow = row.data;
-          if (parsedRow["Total Quantity"] !== "0") {
+          if (
+            parsedRow["Total Quantity"] !== "0" &&
+            parsedRow["Total Quantity"] !== ""
+          ) {
             newData.push(
               mapNewPriceToRow(
                 parsedRow,
@@ -251,7 +272,10 @@ export default function Home() {
   const totals = React.useMemo(() => calculateTotals(), [data]);
 
   const handleDownloadCSV = () => {
-    const filteredData = data.map(({ "Current Price": _, ...rest }) => rest); // Remove "Old Price"
+    const filteredData = data.map(
+      ({ "Current Price": cp, ParsedCondition: pc, Printing: p, ...rest }) =>
+        rest
+    );
     const csv = Papa.unparse(filteredData);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
