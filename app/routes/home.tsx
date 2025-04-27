@@ -45,27 +45,23 @@ interface TCGData {
   Printing: string;
 }
 
-const myScript = `
-if (blp && mp) { return Math.max(1.05 * blp + 0.5 * blp ** (1 / 3), mp * (80 / 85)); }
+const myScript = `if (blp && mp) return Math.max(1.05 * blp + 0.5 * blp ** (1 / 3), mp * (80 / 85));
 
 if (mp) return mp * 1.25;
 
 if (blp) return 1.05 * blp + 0.5 * blp ** (1 / 3);
 
-return mpp;
-`;
+return mpp;`;
 
-const defaultCalculationScript = `
-const floor = 0.15, percent = 1.15;
+const defaultCalculationScript = `const floor = 0.15, percent = 1.15;
 
-if (mp && lp) { return Math.max(mp * percent, lp * percent, floor); }
+if (mp && lp) return Math.max(mp * percent, lp * percent, floor);
 
-if (mp) { return Math.max(mp * percent, floor); }
+if (mp) return Math.max(mp * percent, floor);
 
-if (lp) { return Math.max(lp * percent, floor); }
+if (lp) return Math.max(lp * percent, floor);
 
-return mpp;
-`;
+return mpp;`;
 
 export function meta({}: Route.MetaArgs) {
   return [
