@@ -286,6 +286,10 @@ export default function Home() {
     link.click();
   };
 
+  const handleResetCalculationScript = () => {
+    setCalculationScript(defaultCalculationScript);
+  };
+
   const currencyFormatter = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
@@ -308,6 +312,13 @@ export default function Home() {
               rel="noopener noreferrer"
             >
               View Workflow Guide
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={handleResetCalculationScript} // Call the reset handler
+              disabled={data.length > 0} // Disable when data is loaded
+            >
+              Reset to Default
             </Button>
           </Stack>
           <TextField
