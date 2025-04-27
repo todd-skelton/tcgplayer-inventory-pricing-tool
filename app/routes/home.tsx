@@ -246,7 +246,8 @@ export default function Home() {
       tcgLowPrice: 0,
       tcgMarketplacePrice: 0,
       tcgCurrentPrice: 0,
-      totalChange: 0, // Add totalChange
+      totalChange: 0,
+      totalChangeFromMarket: 0,
     };
 
     data.forEach((row) => {
@@ -265,6 +266,8 @@ export default function Home() {
 
     // Calculate totalChange
     totals.totalChange = totals.tcgMarketplacePrice - totals.tcgCurrentPrice;
+    totals.totalChangeFromMarket =
+      totals.tcgMarketplacePrice - totals.tcgMarketPrice;
 
     return totals;
   };
@@ -419,52 +422,76 @@ export default function Home() {
                 <TableCell align="right" sx={{ width: "0%" }}>
                   Δ&nbsp;($)
                   <br />
-                  <Typography
-                    variant="body2"
-                    style={{
-                      color:
-                        totals.totalChange > 0
-                          ? theme.palette.success.main
-                          : theme.palette.error.main,
-                    }}
+                  <Tooltip
+                    title={`Change from Market: ${
+                      isNaN(totals.totalChangeFromMarket)
+                        ? "N/A"
+                        : currencyFormatter.format(totals.totalChangeFromMarket)
+                    }`}
+                    arrow
                   >
-                    {isNaN(totals.totalChange)
-                      ? ""
-                      : totals.totalChange > 0
-                      ? "+" + currencyFormatter.format(totals.totalChange)
-                      : currencyFormatter.format(totals.totalChange)}
-                  </Typography>
+                    <Typography
+                      variant="body2"
+                      style={{
+                        color:
+                          totals.totalChange > 0
+                            ? theme.palette.success.main
+                            : theme.palette.error.main,
+                      }}
+                    >
+                      {isNaN(totals.totalChange)
+                        ? ""
+                        : totals.totalChange > 0
+                        ? "+" + currencyFormatter.format(totals.totalChange)
+                        : currencyFormatter.format(totals.totalChange)}
+                    </Typography>
+                  </Tooltip>
                 </TableCell>
                 <TableCell align="right" sx={{ width: "0%" }}>
                   Δ&nbsp;(%)
                   <br />
-                  <Typography
-                    variant="body2"
-                    style={{
-                      color:
-                        totals.totalChange > 0
-                          ? theme.palette.success.main
-                          : theme.palette.error.main,
-                    }}
+                  <Tooltip
+                    title={`Percent Change from Market: ${
+                      isNaN(totals.totalChangeFromMarket) ||
+                      totals.tcgMarketPrice === 0
+                        ? "N/A"
+                        : (
+                            ((totals.tcgMarketplacePrice -
+                              totals.tcgMarketPrice) /
+                              totals.tcgMarketPrice) *
+                            100
+                          ).toFixed(2) + "%"
+                    }`}
+                    arrow
                   >
-                    {isNaN(totals.totalChange) || totals.tcgCurrentPrice === 0
-                      ? ""
-                      : totals.totalChange > 0
-                      ? "+" +
-                        (
-                          ((totals.tcgMarketplacePrice -
-                            totals.tcgCurrentPrice) /
-                            totals.tcgCurrentPrice) *
-                          100
-                        ).toFixed(2)
-                      : (
-                          ((totals.tcgMarketplacePrice -
-                            totals.tcgCurrentPrice) /
-                            totals.tcgCurrentPrice) *
-                          100
-                        ).toFixed(2)}
-                    %
-                  </Typography>
+                    <Typography
+                      variant="body2"
+                      style={{
+                        color:
+                          totals.totalChange > 0
+                            ? theme.palette.success.main
+                            : theme.palette.error.main,
+                      }}
+                    >
+                      {isNaN(totals.totalChange) || totals.tcgCurrentPrice === 0
+                        ? ""
+                        : totals.totalChange > 0
+                        ? "+" +
+                          (
+                            ((totals.tcgMarketplacePrice -
+                              totals.tcgCurrentPrice) /
+                              totals.tcgCurrentPrice) *
+                            100
+                          ).toFixed(2)
+                        : (
+                            ((totals.tcgMarketplacePrice -
+                              totals.tcgCurrentPrice) /
+                              totals.tcgCurrentPrice) *
+                            100
+                          ).toFixed(2)}
+                      %
+                    </Typography>
+                  </Tooltip>
                 </TableCell>
               </TableRow>
             </TableHead>
