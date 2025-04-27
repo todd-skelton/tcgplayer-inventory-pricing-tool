@@ -18,8 +18,12 @@ import {
   DialogActions,
   TablePagination,
   Tooltip,
+  AppBar,
+  Toolbar,
+  IconButton,
 } from "@mui/material";
 import ImageIcon from "@mui/icons-material/Image";
+import MenuIcon from "@mui/icons-material/Menu";
 import Papa from "papaparse";
 import { useLocalStorageState } from "~/hooks/useLocalStorageState";
 
@@ -297,30 +301,42 @@ export default function Home() {
 
   return (
     <Stack spacing={2}>
+      <AppBar position="static">
+        <Toolbar>
+          <IconButton
+            edge="start"
+            color="inherit"
+            aria-label="menu"
+            sx={{ mr: 2 }}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+            TCGplayer Inventory Pricing Tool
+          </Typography>
+          <Button color="inherit" onClick={handleHelpDialogOpen}>
+            View Script Help
+          </Button>
+          <Button
+            color="inherit"
+            component="a"
+            href="/inventory-pricing-tool-guide.gif"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            View Workflow Guide
+          </Button>
+          <Button
+            color="inherit"
+            onClick={handleResetCalculationScript}
+            disabled={data.length > 0}
+          >
+            Reset to Default
+          </Button>
+        </Toolbar>
+      </AppBar>
       <Container sx={{ alignSelf: "center" }}>
         <Stack spacing={2}>
-          <Typography variant="h4">TCGplayer Iventory Pricing Tool</Typography>
-          <Stack spacing={2} direction="row">
-            <Button variant="outlined" onClick={handleHelpDialogOpen}>
-              View Script Help
-            </Button>
-            <Button
-              variant="outlined"
-              component="a"
-              href="/inventory-pricing-tool-guide.gif"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              View Workflow Guide
-            </Button>
-            <Button
-              variant="outlined"
-              onClick={handleResetCalculationScript} // Call the reset handler
-              disabled={data.length > 0} // Disable when data is loaded
-            >
-              Reset to Default
-            </Button>
-          </Stack>
           <TextField
             label="Calculation Script"
             spellCheck="false"
