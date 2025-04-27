@@ -20,10 +20,8 @@ import {
   Tooltip,
   AppBar,
   Toolbar,
-  IconButton,
 } from "@mui/material";
 import ImageIcon from "@mui/icons-material/Image";
-import MenuIcon from "@mui/icons-material/Menu";
 import Papa from "papaparse";
 import { useLocalStorageState } from "~/hooks/useLocalStorageState";
 
@@ -516,120 +514,132 @@ export default function Home() {
                   page * (rowsPerPage ?? 250),
                   page * (rowsPerPage ?? 250) + (rowsPerPage ?? 250)
                 )
-                .map((row) => (
-                  <TableRow key={row["TCGplayer Id"]}>
-                    <TableCell>
-                      {row["Product Line"]}: {row["Set Name"]}
-                    </TableCell>
-                    <TableCell>
-                      {row["Product Name"] && `${row["Product Name"]} `}
-                      {row["Number"] && `- ${row["Number"]} `}
-                      {row["Rarity"] && `- ${row["Rarity"]} `}
-                      {row["Condition"] && `- ${row["Condition"]}`}
-                      {row["Title"] && (
-                        <Tooltip title={row["Title"]} arrow>
-                          <ImageIcon
-                            sx={{
-                              fontSize: "1rem",
-                              verticalAlign: "middle",
-                              marginLeft: "0.25rem",
-                            }}
-                          />
-                        </Tooltip>
-                      )}
-                    </TableCell>
-                    <TableCell align="right">
-                      {isNaN(parseFloat(row["TCG Market Price"]))
-                        ? ""
-                        : currencyFormatter.format(
-                            parseFloat(row["TCG Market Price"])
-                          )}
-                    </TableCell>
-                    <TableCell align="right">
-                      {isNaN(parseFloat(row["TCG Low Price With Shipping"]))
-                        ? ""
-                        : currencyFormatter.format(
-                            parseFloat(row["TCG Low Price With Shipping"])
-                          )}
-                    </TableCell>
-                    <TableCell align="right">
-                      {isNaN(parseFloat(row["TCG Low Price"]))
-                        ? ""
-                        : currencyFormatter.format(
-                            parseFloat(row["TCG Low Price"])
-                          )}
-                    </TableCell>
-                    <TableCell align="right">
-                      {isNaN(parseFloat(row["Total Quantity"]))
-                        ? ""
-                        : row["Total Quantity"]}
-                    </TableCell>
-                    <TableCell align="right">
-                      {isNaN(parseFloat(row["Current Price"]))
-                        ? ""
-                        : currencyFormatter.format(
-                            parseFloat(row["Current Price"])
-                          )}
-                    </TableCell>
-                    <TableCell align="right">
-                      {isNaN(parseFloat(row["TCG Marketplace Price"]))
-                        ? ""
-                        : currencyFormatter.format(
-                            parseFloat(row["TCG Marketplace Price"])
-                          )}
-                    </TableCell>
+                .map((row) => {
+                  const marketplacePrice = parseFloat(
+                    row["TCG Marketplace Price"]
+                  );
+                  const currentPrice = parseFloat(row["Current Price"]);
+                  const priceDifference = marketplacePrice - currentPrice;
+                  const percentageChange =
+                    (priceDifference / currentPrice) * 100;
 
-                    {(() => {
-                      const marketplacePrice = parseFloat(
-                        row["TCG Marketplace Price"]
+                  const formattedMarketPrice = isNaN(
+                    parseFloat(row["TCG Market Price"])
+                  )
+                    ? ""
+                    : currencyFormatter.format(
+                        parseFloat(row["TCG Market Price"])
                       );
-                      const currentPrice = parseFloat(row["Current Price"]);
-                      const priceDifference = marketplacePrice - currentPrice;
-                      const percentageChange =
-                        (priceDifference / currentPrice) * 100;
-                      return (
-                        <>
-                          <TableCell align="right">
-                            <Typography
-                              variant="body2"
-                              style={{
-                                color:
-                                  priceDifference > 0
-                                    ? theme.palette.success.main
-                                    : theme.palette.error.main,
-                              }}
-                            >
-                              {isNaN(priceDifference)
-                                ? ""
-                                : priceDifference > 0
-                                ? "+" +
-                                  currencyFormatter.format(priceDifference)
-                                : currencyFormatter.format(priceDifference)}
-                            </Typography>
-                          </TableCell>
-                          <TableCell align="right">
-                            <Typography
-                              variant="body2"
-                              style={{
-                                color:
-                                  priceDifference > 0
-                                    ? theme.palette.success.main
-                                    : theme.palette.error.main,
-                              }}
-                            >
-                              {isNaN(priceDifference) || currentPrice === 0
-                                ? ""
-                                : priceDifference > 0
-                                ? "+" + percentageChange.toFixed(2)
-                                : percentageChange.toFixed(2)}
-                              %
-                            </Typography>
-                          </TableCell>
-                        </>
+
+                  const formattedLowPriceWithShipping = isNaN(
+                    parseFloat(row["TCG Low Price With Shipping"])
+                  )
+                    ? ""
+                    : currencyFormatter.format(
+                        parseFloat(row["TCG Low Price With Shipping"])
                       );
-                    })()}
-                  </TableRow>
-                ))}
+
+                  const formattedLowPrice = isNaN(
+                    parseFloat(row["TCG Low Price"])
+                  )
+                    ? ""
+                    : currencyFormatter.format(
+                        parseFloat(row["TCG Low Price"])
+                      );
+
+                  const formattedTotalQuantity = isNaN(
+                    parseFloat(row["Total Quantity"])
+                  )
+                    ? ""
+                    : row["Total Quantity"];
+
+                  const formattedCurrentPrice = isNaN(currentPrice)
+                    ? ""
+                    : currencyFormatter.format(currentPrice);
+
+                  const formattedMarketplacePrice = isNaN(marketplacePrice)
+                    ? ""
+                    : currencyFormatter.format(marketplacePrice);
+
+                  const formattedPriceDifference = isNaN(priceDifference)
+                    ? ""
+                    : priceDifference > 0
+                    ? "+" + currencyFormatter.format(priceDifference)
+                    : currencyFormatter.format(priceDifference);
+
+                  const formattedPercentageChange =
+                    isNaN(priceDifference) || currentPrice === 0
+                      ? ""
+                      : priceDifference > 0
+                      ? "+" + percentageChange.toFixed(2)
+                      : percentageChange.toFixed(2);
+
+                  const priceDifferenceColor =
+                    priceDifference > 0
+                      ? theme.palette.success.main
+                      : theme.palette.error.main;
+
+                  return (
+                    <TableRow key={row["TCGplayer Id"]}>
+                      <TableCell>
+                        {row["Product Line"]}: {row["Set Name"]}
+                      </TableCell>
+                      <TableCell>
+                        {row["Product Name"] && `${row["Product Name"]} `}
+                        {row["Number"] && `- ${row["Number"]} `}
+                        {row["Rarity"] && `- ${row["Rarity"]} `}
+                        {row["Condition"] && `- ${row["Condition"]}`}
+                        {row["Title"] && (
+                          <Tooltip title={row["Title"]} arrow>
+                            <ImageIcon
+                              sx={{
+                                fontSize: "1rem",
+                                verticalAlign: "middle",
+                                marginLeft: "0.25rem",
+                              }}
+                            />
+                          </Tooltip>
+                        )}
+                      </TableCell>
+                      <TableCell align="right">
+                        {formattedMarketPrice}
+                      </TableCell>
+                      <TableCell align="right">
+                        {formattedLowPriceWithShipping}
+                      </TableCell>
+                      <TableCell align="right">{formattedLowPrice}</TableCell>
+                      <TableCell align="right">
+                        {formattedTotalQuantity}
+                      </TableCell>
+                      <TableCell align="right">
+                        {formattedCurrentPrice}
+                      </TableCell>
+                      <TableCell align="right">
+                        {formattedMarketplacePrice}
+                      </TableCell>
+                      <TableCell align="right">
+                        <Typography
+                          variant="body2"
+                          style={{
+                            color: priceDifferenceColor,
+                          }}
+                        >
+                          {formattedPriceDifference}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="right">
+                        <Typography
+                          variant="body2"
+                          style={{
+                            color: priceDifferenceColor,
+                          }}
+                        >
+                          {formattedPercentageChange}%
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
             </TableBody>
           </Table>
           <TablePagination
