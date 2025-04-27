@@ -80,6 +80,7 @@ const calculateNewPrice = (
   tcgMarketPrice: number,
   tcgLowPriceWithShipping: number,
   tcgLowPrice: number,
+  tcgDirectLow: number,
   tcgMarketPlacePrice: number,
   totalQuantity: number,
   condition: string,
@@ -98,6 +99,7 @@ const calculateNewPrice = (
       "mp",
       "lps",
       "lp",
+      "dlp",
       "mpp",
       "blp",
       "q",
@@ -113,6 +115,7 @@ const calculateNewPrice = (
       tcgMarketPrice,
       tcgLowPriceWithShipping,
       tcgLowPrice,
+      tcgDirectLow,
       tcgMarketPlacePrice,
       bestLowPrice,
       totalQuantity,
@@ -136,6 +139,7 @@ function mapNewPriceToRow(row: TCGData, calculationScript: string): TCGData {
     parseFloat(row["TCG Market Price"]),
     parseFloat(row["TCG Low Price With Shipping"]),
     parseFloat(row["TCG Low Price"]),
+    parseFloat(row["TCG Direct Low"]),
     currentPrice,
     parseFloat(row["Total Quantity"]),
     row["Condition"],
@@ -182,7 +186,7 @@ export default function Home() {
   );
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const handleChangePage = (event: unknown, newPage: number) => {
+  const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
   };
 
@@ -242,6 +246,7 @@ export default function Home() {
       tcgMarketPrice: 0,
       tcgLowPriceWithShipping: 0,
       tcgLowPrice: 0,
+      tcgDirectLow: 0,
       tcgMarketplacePrice: 0,
       tcgCurrentPrice: 0,
       totalChange: 0,
@@ -256,6 +261,7 @@ export default function Home() {
       totals.tcgLowPriceWithShipping +=
         quantity * parseFloat(row["TCG Low Price With Shipping"]) || 0;
       totals.tcgLowPrice += quantity * parseFloat(row["TCG Low Price"]) || 0;
+      totals.tcgDirectLow += quantity * parseFloat(row["TCG Direct Low"]) || 0;
       totals.tcgMarketplacePrice +=
         quantity * parseFloat(row["TCG Marketplace Price"]) || 0;
       totals.tcgCurrentPrice +=
@@ -393,14 +399,14 @@ export default function Home() {
                   Product&nbsp;(p)&nbsp;-&nbsp;Number&nbsp;(n)&nbsp;-&nbsp;Rarity&nbsp;(r)&nbsp;-&nbsp;Condition&nbsp;(c)
                 </TableCell>
                 <TableCell align="right" sx={{ width: "0%" }}>
-                  Market&nbsp;(mp)
+                  Mrkt&nbsp;(mp)
                   <br />
                   {isNaN(totals.tcgMarketPrice)
                     ? ""
                     : currencyFormatter.format(totals.tcgMarketPrice)}
                 </TableCell>
                 <TableCell align="right" sx={{ width: "0%" }}>
-                  Low+Shipping&nbsp;(lps)
+                  L+S&nbsp;(lps)
                   <br />
                   {isNaN(totals.tcgLowPriceWithShipping)
                     ? ""
@@ -414,12 +420,19 @@ export default function Home() {
                     : currencyFormatter.format(totals.tcgLowPrice)}
                 </TableCell>
                 <TableCell align="right" sx={{ width: "0%" }}>
+                  Direct&nbsp;(dlp)
+                  <br />
+                  {isNaN(totals.tcgDirectLow)
+                    ? ""
+                    : currencyFormatter.format(totals.tcgDirectLow)}
+                </TableCell>
+                <TableCell align="right" sx={{ width: "0%" }}>
                   Qty&nbsp;(q)
                   <br />
                   {isNaN(totals.totalQuantity) ? "" : totals.totalQuantity}
                 </TableCell>
                 <TableCell align="right" sx={{ width: "0%" }}>
-                  Current&nbsp;(mpp)
+                  Crnt&nbsp;(mpp)
                   <br />
                   {isNaN(totals.tcgCurrentPrice)
                     ? ""
@@ -547,6 +560,11 @@ export default function Home() {
                         parseFloat(row["TCG Low Price"])
                       );
 
+                  const directLowPrice = parseFloat(row["TCG Direct Low"]);
+                  const formattedDirectLowPrice = isNaN(directLowPrice)
+                    ? ""
+                    : currencyFormatter.format(directLowPrice);
+
                   const formattedTotalQuantity = isNaN(
                     parseFloat(row["Total Quantity"])
                   )
@@ -581,25 +599,48 @@ export default function Home() {
 
                   return (
                     <TableRow key={row["TCGplayer Id"]}>
-                      <TableCell>
-                        {row["Product Line"]}: {row["Set Name"]}
+                      <TableCell
+                        sx={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          maxWidth: "150px",
+                        }}
+                      >
+                        <span
+                          title={`${row["Product Line"]}: ${row["Set Name"]}`}
+                        >
+                          {row["Product Line"]}: {row["Set Name"]}
+                        </span>
                       </TableCell>
-                      <TableCell>
-                        {row["Product Name"] && `${row["Product Name"]} `}
-                        {row["Number"] && `- ${row["Number"]} `}
-                        {row["Rarity"] && `- ${row["Rarity"]} `}
-                        {row["Condition"] && `- ${row["Condition"]}`}
-                        {row["Title"] && (
-                          <Tooltip title={row["Title"]} arrow>
+                      <TableCell
+                        sx={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          maxWidth: "250px",
+                        }}
+                      >
+                        <span
+                          title={`${row["Product Name"] || ""} ${
+                            row["Number"] || ""
+                          } ${row["Rarity"] || ""} ${row["Condition"] || ""}`}
+                        >
+                          {row["Title"] && (
                             <ImageIcon
                               sx={{
                                 fontSize: "1rem",
                                 verticalAlign: "middle",
                                 marginLeft: "0.25rem",
                               }}
+                              titleAccess={row["Title"]}
                             />
-                          </Tooltip>
-                        )}
+                          )}
+                          {row["Product Name"] && `${row["Product Name"]} `}
+                          {row["Number"] && `- ${row["Number"]} `}
+                          {row["Rarity"] && `- ${row["Rarity"]} `}
+                          {row["Condition"] && `- ${row["Condition"]}`}
+                        </span>
                       </TableCell>
                       <TableCell align="right">
                         {formattedMarketPrice}
@@ -608,6 +649,9 @@ export default function Home() {
                         {formattedLowPriceWithShipping}
                       </TableCell>
                       <TableCell align="right">{formattedLowPrice}</TableCell>
+                      <TableCell align="right">
+                        {formattedDirectLowPrice}
+                      </TableCell>
                       <TableCell align="right">
                         {formattedTotalQuantity}
                       </TableCell>
@@ -696,6 +740,16 @@ export default function Home() {
             </Typography>
             <Typography component="dd" variant="body2" gutterBottom>
               TCG Low Price
+            </Typography>
+            <Typography
+              component="dt"
+              variant="h6"
+              style={{ fontFamily: "monospaced" }}
+            >
+              dlp
+            </Typography>
+            <Typography component="dd" variant="body2" gutterBottom>
+              TCG Direct Low
             </Typography>
             <Typography
               component="dt"
