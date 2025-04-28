@@ -65,6 +65,12 @@ if (lp) return Math.max(lp * percent, floor);
 
 return mpp;`;
 
+const defaultPrefilterScript = `// include in the output when quantity is over 0
+return q > 0;`;
+
+const defaultPostfilterScript = `// include in the output when new price not the same as current price
+return mpp !== cp;`;
+
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "TCGplayer Inventory Pricing Tool" }, // Updated title
@@ -75,25 +81,86 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-const calculateNewPrice = (
-  calculationScript: string,
-  tcgMarketPrice: number,
-  tcgLowPriceWithShipping: number,
-  tcgLowPrice: number,
-  tcgDirectLow: number,
-  tcgMarketPlacePrice: number,
-  totalQuantity: number,
-  condition: string,
-  productName: string,
-  rarity: string,
-  number: string,
-  setName: string,
-  productLine: string
-): number => {
+const prefiltered = (prefilterScript: string, row: TCGData): boolean => {
+  const tcgMarketPrice = parseFloat(row["TCG Market Price"]);
+  const tcgLowPriceWithShipping = parseFloat(
+    row["TCG Low Price With Shipping"]
+  );
+  const tcgLowPrice = parseFloat(row["TCG Low Price"]);
+  const tcgDirectLow = parseFloat(row["TCG Direct Low"]);
+  const tcgMarketPlacePrice = parseFloat(row["TCG Marketplace Price"]);
+  const totalQuantity = parseFloat(row["Total Quantity"]);
+  const condition = row["Condition"];
+  const productName = row["Product Name"];
+  const rarity = row["Rarity"];
+  const number = row["Number"];
+  const setName = row["Set Name"];
+  const productLine = row["Product Line"];
+
   const bestLowPrice =
     tcgLowPriceWithShipping > 4.99
       ? tcgLowPriceWithShipping
       : tcgLowPriceWithShipping - 1.31;
+
+  try {
+    const func = new Function(
+      "mp",
+      "lps",
+      "lp",
+      "dlp",
+      "mpp",
+      "blp",
+      "q",
+      "c",
+      "p",
+      "r",
+      "n",
+      "s",
+      "l",
+      prefilterScript
+    );
+    return func(
+      tcgMarketPrice,
+      tcgLowPriceWithShipping,
+      tcgLowPrice,
+      tcgDirectLow,
+      tcgMarketPlacePrice,
+      bestLowPrice,
+      totalQuantity,
+      condition,
+      productName,
+      rarity,
+      number,
+      setName,
+      productLine
+    );
+  } catch (error) {
+    console.error("Error in filter script:", error);
+    return false;
+  }
+};
+
+const calculateNewPrice = (calculationScript: string, row: TCGData): number => {
+  const tcgMarketPrice = parseFloat(row["TCG Market Price"]);
+  const tcgLowPriceWithShipping = parseFloat(
+    row["TCG Low Price With Shipping"]
+  );
+  const tcgLowPrice = parseFloat(row["TCG Low Price"]);
+  const tcgDirectLow = parseFloat(row["TCG Direct Low"]);
+  const tcgMarketPlacePrice = parseFloat(row["TCG Marketplace Price"]);
+  const totalQuantity = parseFloat(row["Total Quantity"]);
+  const condition = row["Condition"];
+  const productName = row["Product Name"];
+  const rarity = row["Rarity"];
+  const number = row["Number"];
+  const setName = row["Set Name"];
+  const productLine = row["Product Line"];
+
+  const bestLowPrice =
+    tcgLowPriceWithShipping > 4.99
+      ? tcgLowPriceWithShipping
+      : tcgLowPriceWithShipping - 1.31;
+
   try {
     const func = new Function(
       "mp",
@@ -132,23 +199,71 @@ const calculateNewPrice = (
   }
 };
 
-function mapNewPriceToRow(row: TCGData, calculationScript: string): TCGData {
-  const currentPrice = parseFloat(row["TCG Marketplace Price"]);
-  const newPrice = calculateNewPrice(
-    calculationScript,
-    parseFloat(row["TCG Market Price"]),
-    parseFloat(row["TCG Low Price With Shipping"]),
-    parseFloat(row["TCG Low Price"]),
-    parseFloat(row["TCG Direct Low"]),
-    currentPrice,
-    parseFloat(row["Total Quantity"]),
-    row["Condition"],
-    row["Product Name"],
-    row["Rarity"],
-    row["Number"],
-    row["Set Name"],
-    row["Product Line"]
+const postfiltered = (postfilterScript: string, row: TCGData): boolean => {
+  const tcgMarketPrice = parseFloat(row["TCG Market Price"]);
+  const tcgLowPriceWithShipping = parseFloat(
+    row["TCG Low Price With Shipping"]
   );
+  const tcgLowPrice = parseFloat(row["TCG Low Price"]);
+  const tcgDirectLow = parseFloat(row["TCG Direct Low"]);
+  const tcgMarketPlacePrice = parseFloat(row["TCG Marketplace Price"]);
+  const totalQuantity = parseFloat(row["Total Quantity"]);
+  const condition = row["Condition"];
+  const productName = row["Product Name"];
+  const rarity = row["Rarity"];
+  const number = row["Number"];
+  const setName = row["Set Name"];
+  const productLine = row["Product Line"];
+  const currentPrice = parseFloat(row["Current Price"]);
+
+  const bestLowPrice =
+    tcgLowPriceWithShipping > 4.99
+      ? tcgLowPriceWithShipping
+      : tcgLowPriceWithShipping - 1.31;
+
+  try {
+    const func = new Function(
+      "mp",
+      "lps",
+      "lp",
+      "dlp",
+      "mpp",
+      "blp",
+      "q",
+      "c",
+      "p",
+      "r",
+      "n",
+      "s",
+      "l",
+      "cp",
+      postfilterScript
+    );
+    return func(
+      tcgMarketPrice,
+      tcgLowPriceWithShipping,
+      tcgLowPrice,
+      tcgDirectLow,
+      tcgMarketPlacePrice,
+      bestLowPrice,
+      totalQuantity,
+      condition,
+      productName,
+      rarity,
+      number,
+      setName,
+      productLine,
+      currentPrice
+    );
+  } catch (error) {
+    console.error("Error in filter script:", error);
+    return false;
+  }
+};
+
+function applyPriceScript(row: TCGData, calculationScript: string): TCGData {
+  const currentPrice = parseFloat(row["TCG Marketplace Price"]);
+  const newPrice = calculateNewPrice(calculationScript, row);
 
   const validConditions = [
     "Near Mint",
@@ -178,6 +293,14 @@ export default function Home() {
   const [data, setData] = useState<TCGData[]>([]);
   const [calculationScript, setCalculationScript] =
     useLocalStorageState<string>("calculationScript", defaultCalculationScript);
+  const [prefilterScript, setPrefilterScript] = useLocalStorageState<string>(
+    "prefilterScript",
+    defaultPrefilterScript
+  );
+  const [postfilterScript, setPostfilterScript] = useLocalStorageState<string>(
+    "postfilterScript",
+    defaultPostfilterScript
+  );
   const [helpDialogOpen, setHelpDialogOpen] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useLocalStorageState(
@@ -218,17 +341,13 @@ export default function Home() {
         skipEmptyLines: true,
         step: (row) => {
           const parsedRow = row.data;
-          if (
-            parsedRow["Total Quantity"] !== "0" &&
-            parsedRow["Total Quantity"] !== ""
-          ) {
-            newData.push(
-              mapNewPriceToRow(
-                parsedRow,
-                calculationScript || defaultCalculationScript
-              )
-            );
-          }
+          if (!prefiltered(prefilterScript, parsedRow)) return;
+
+          const newPrice = applyPriceScript(parsedRow, calculationScript);
+
+          if (!postfiltered(postfilterScript, newPrice)) return;
+
+          newData.push(newPrice);
         },
         complete: () => {
           setData(newData);
@@ -334,6 +453,32 @@ export default function Home() {
       <Container sx={{ alignSelf: "center" }}>
         <Stack spacing={2}>
           <TextField
+            label="Pre-filter Script"
+            spellCheck="false"
+            slotProps={{
+              inputLabel: {
+                shrink: true,
+              },
+              input: {
+                style: {
+                  fontFamily: "monospace",
+                },
+              },
+            }}
+            placeholder="Enter your pre-filter script here"
+            multiline
+            fullWidth
+            value={prefilterScript}
+            onChange={(e) => setPrefilterScript(e.target.value)}
+            variant="outlined"
+            onInput={(e) => {
+              const target = e.target as HTMLTextAreaElement;
+              target.style.height = "auto"; // Reset height to auto to calculate the new height
+              target.style.height = `${target.scrollHeight}px`; // Set height to match content
+            }}
+            disabled={data.length > 0} // Disable when data is loaded
+          />
+          <TextField
             label="Calculation Script"
             spellCheck="false"
             slotProps={{
@@ -351,6 +496,32 @@ export default function Home() {
             fullWidth
             value={calculationScript}
             onChange={(e) => setCalculationScript(e.target.value)}
+            variant="outlined"
+            onInput={(e) => {
+              const target = e.target as HTMLTextAreaElement;
+              target.style.height = "auto"; // Reset height to auto to calculate the new height
+              target.style.height = `${target.scrollHeight}px`; // Set height to match content
+            }}
+            disabled={data.length > 0} // Disable when data is loaded
+          />
+          <TextField
+            label="Post-filter Script"
+            spellCheck="false"
+            slotProps={{
+              inputLabel: {
+                shrink: true,
+              },
+              input: {
+                style: {
+                  fontFamily: "monospace",
+                },
+              },
+            }}
+            placeholder="Enter your post-filter script here"
+            multiline
+            fullWidth
+            value={postfilterScript}
+            onChange={(e) => setPostfilterScript(e.target.value)}
             variant="outlined"
             onInput={(e) => {
               const target = e.target as HTMLTextAreaElement;
