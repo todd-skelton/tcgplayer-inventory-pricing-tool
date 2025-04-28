@@ -595,7 +595,9 @@ export default function Home() {
                   const priceDifferenceColor =
                     priceDifference > 0
                       ? theme.palette.success.main
-                      : theme.palette.error.main;
+                      : priceDifference < 0
+                      ? theme.palette.error.main
+                      : theme.palette.text.primary;
 
                   return (
                     <TableRow key={row["TCGplayer Id"]}>
