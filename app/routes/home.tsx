@@ -90,6 +90,7 @@ const prefiltered = (prefilterScript: string, row: TCGData): boolean => {
   const tcgDirectLow = parseFloat(row["TCG Direct Low"]);
   const tcgMarketPlacePrice = parseFloat(row["TCG Marketplace Price"]);
   const totalQuantity = parseFloat(row["Total Quantity"]);
+  const addToQuantity = parseFloat(row["Add to Quantity"]);
   const condition = row["Condition"];
   const productName = row["Product Name"];
   const rarity = row["Rarity"];
@@ -117,6 +118,7 @@ const prefiltered = (prefilterScript: string, row: TCGData): boolean => {
       "n",
       "s",
       "l",
+      "aq",
       prefilterScript
     );
     return func(
@@ -132,7 +134,8 @@ const prefiltered = (prefilterScript: string, row: TCGData): boolean => {
       rarity,
       number,
       setName,
-      productLine
+      productLine,
+      addToQuantity
     );
   } catch (error) {
     console.error("Error in filter script:", error);
@@ -149,6 +152,7 @@ const calculateNewPrice = (calculationScript: string, row: TCGData): number => {
   const tcgDirectLow = parseFloat(row["TCG Direct Low"]);
   const tcgMarketPlacePrice = parseFloat(row["TCG Marketplace Price"]);
   const totalQuantity = parseFloat(row["Total Quantity"]);
+  const addToQuantity = parseFloat(row["Add to Quantity"]);
   const condition = row["Condition"];
   const productName = row["Product Name"];
   const rarity = row["Rarity"];
@@ -176,6 +180,7 @@ const calculateNewPrice = (calculationScript: string, row: TCGData): number => {
       "n",
       "s",
       "l",
+      "aq",
       calculationScript
     );
     return func(
@@ -191,7 +196,8 @@ const calculateNewPrice = (calculationScript: string, row: TCGData): number => {
       rarity,
       number,
       setName,
-      productLine
+      productLine,
+      addToQuantity
     );
   } catch (error) {
     console.error("Error in calculation script:", error);
@@ -208,6 +214,7 @@ const postfiltered = (postfilterScript: string, row: TCGData): boolean => {
   const tcgDirectLow = parseFloat(row["TCG Direct Low"]);
   const tcgMarketPlacePrice = parseFloat(row["TCG Marketplace Price"]);
   const totalQuantity = parseFloat(row["Total Quantity"]);
+  const addToQuantity = parseFloat(row["Add to Quantity"]);
   const condition = row["Condition"];
   const productName = row["Product Name"];
   const rarity = row["Rarity"];
@@ -237,6 +244,7 @@ const postfiltered = (postfilterScript: string, row: TCGData): boolean => {
       "s",
       "l",
       "cp",
+      "aq",
       postfilterScript
     );
     return func(
@@ -253,7 +261,8 @@ const postfiltered = (postfilterScript: string, row: TCGData): boolean => {
       number,
       setName,
       productLine,
-      currentPrice
+      currentPrice,
+      addToQuantity
     );
   } catch (error) {
     console.error("Error in filter script:", error);
@@ -1013,6 +1022,26 @@ export default function Home() {
             </Typography>
             <Typography component="dd" variant="body2" gutterBottom>
               Product Line
+            </Typography>
+            <Typography
+              component="dt"
+              variant="h6"
+              style={{ fontFamily: "monospaced" }}
+            >
+              aq
+            </Typography>
+            <Typography component="dd" variant="body2" gutterBottom>
+              Add to Quantity
+            </Typography>
+            <Typography
+              component="dt"
+              variant="h6"
+              style={{ fontFamily: "monospaced" }}
+            >
+              cp
+            </Typography>
+            <Typography component="dd" variant="body2" gutterBottom>
+              Current Price
             </Typography>
           </Typography>
           <Typography variant="body1" gutterBottom>
