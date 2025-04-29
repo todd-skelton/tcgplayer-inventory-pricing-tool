@@ -55,14 +55,15 @@ if (blp) return 1.05 * blp + 0.5 * blp ** (1 / 3);
 
 return mpp;`;
 
-const defaultCalculationScript = `const floor = 0.15, percent = 1.15;
-
+const defaultCalculationScript = `// set a floor of 15 cents and a percent of 115%
+const floor = 0.15, percent = 1.15;
+// if the market price and low price are both available, use the higher of the two or the floor
 if (mp && lp) return Math.max(mp * percent, lp * percent, floor);
-
+// if the market price is available, use it or the floor
 if (mp) return Math.max(mp * percent, floor);
-
+// if the low price is available, use it or the floor
 if (lp) return Math.max(lp * percent, floor);
-
+// otherwise, use the current marketplace price
 return mpp;`;
 
 const defaultPrefilterScript = `// only include in the calculation when qty or add to qty is over 0
