@@ -65,11 +65,11 @@ if (lp) return Math.max(lp * percent, floor);
 
 return mpp;`;
 
-const defaultPrefilterScript = `// include in the output when quantity is over 0
-return q > 0;`;
+const defaultPrefilterScript = `// include in the output when qty or add to qty is over 0
+return q > 0 || aq > 0;`;
 
-const defaultPostfilterScript = `// include in the output when new price not the same as current price
-return mpp !== cp;`;
+const defaultPostfilterScript = `// include in the output when new price not the same as current price or add to qty is over 0
+return mpp !== cp || aq > 0;`;
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -422,8 +422,14 @@ export default function Home() {
     link.click();
   };
 
-  const handleResetCalculationScript = () => {
+  const handleResetToDefault = () => {
     setCalculationScript(defaultCalculationScript);
+    setPrefilterScript(defaultPrefilterScript);
+    setPostfilterScript(defaultPostfilterScript);
+    setData([]);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const currencyFormatter = new Intl.NumberFormat("en-US", {
@@ -452,7 +458,7 @@ export default function Home() {
           </Button>
           <Button
             color="inherit"
-            onClick={handleResetCalculationScript}
+            onClick={handleResetToDefault}
             disabled={data.length > 0}
           >
             Reset to Default
