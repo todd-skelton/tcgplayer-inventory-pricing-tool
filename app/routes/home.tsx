@@ -65,10 +65,10 @@ if (lp) return Math.max(lp * percent, floor);
 
 return mpp;`;
 
-const defaultPrefilterScript = `// include in the output when qty or add to qty is over 0
+const defaultPrefilterScript = `// only include in the calculation when qty or add to qty is over 0
 return q > 0 || aq > 0;`;
 
-const defaultPostfilterScript = `// include in the output when new price not the same as current price or add to qty is over 0
+const defaultPostfilterScript = `// only include in the output when new price not the same as current price or add to qty is over 0
 return mpp !== cp || aq > 0;`;
 
 export function meta({}: Route.MetaArgs) {
