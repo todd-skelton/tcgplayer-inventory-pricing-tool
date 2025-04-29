@@ -24,6 +24,9 @@ import {
 import ImageIcon from "@mui/icons-material/Image";
 import Papa from "papaparse";
 import { useLocalStorageState } from "~/hooks/useLocalStorageState";
+import CodeMirror from "@uiw/react-codemirror";
+import { javascript } from "@codemirror/lang-javascript";
+import { oneDark } from "@codemirror/theme-one-dark";
 
 interface TCGData {
   "TCGplayer Id": string;
@@ -468,83 +471,38 @@ export default function Home() {
       </AppBar>
       <Container sx={{ alignSelf: "center" }}>
         <Stack spacing={2}>
-          <TextField
-            label="Pre-filter Script"
-            spellCheck="false"
-            slotProps={{
-              inputLabel: {
-                shrink: true,
-              },
-              input: {
-                style: {
-                  fontFamily: "monospace",
-                },
-              },
-            }}
-            placeholder="Enter your pre-filter script here"
-            multiline
-            fullWidth
+          <Typography variant="h6">
+            Pre-filter Script{" "}
+            {data.length > 0 ? "(Clear dataset to enable changes)" : ""}
+          </Typography>
+          <CodeMirror
             value={prefilterScript}
-            onChange={(e) => setPrefilterScript(e.target.value)}
-            variant="outlined"
-            onInput={(e) => {
-              const target = e.target as HTMLTextAreaElement;
-              target.style.height = "auto"; // Reset height to auto to calculate the new height
-              target.style.height = `${target.scrollHeight}px`; // Set height to match content
-            }}
-            disabled={data.length > 0} // Disable when data is loaded
+            extensions={[javascript()]}
+            theme={oneDark}
+            onChange={(value) => setPrefilterScript(value)}
+            readOnly={data.length > 0}
           />
-          <TextField
-            label="Calculation Script"
-            spellCheck="false"
-            slotProps={{
-              inputLabel: {
-                shrink: true,
-              },
-              input: {
-                style: {
-                  fontFamily: "monospace",
-                },
-              },
-            }}
-            placeholder="Enter your calculation script here"
-            multiline
-            fullWidth
+          <Typography variant="h6">
+            Calculation Script{" "}
+            {data.length > 0 ? "(Clear dataset to enable changes)" : ""}
+          </Typography>
+          <CodeMirror
             value={calculationScript}
-            onChange={(e) => setCalculationScript(e.target.value)}
-            variant="outlined"
-            onInput={(e) => {
-              const target = e.target as HTMLTextAreaElement;
-              target.style.height = "auto"; // Reset height to auto to calculate the new height
-              target.style.height = `${target.scrollHeight}px`; // Set height to match content
-            }}
-            disabled={data.length > 0} // Disable when data is loaded
+            extensions={[javascript()]}
+            theme={oneDark}
+            onChange={(value) => setCalculationScript(value)}
+            readOnly={data.length > 0}
           />
-          <TextField
-            label="Post-filter Script"
-            spellCheck="false"
-            slotProps={{
-              inputLabel: {
-                shrink: true,
-              },
-              input: {
-                style: {
-                  fontFamily: "monospace",
-                },
-              },
-            }}
-            placeholder="Enter your post-filter script here"
-            multiline
-            fullWidth
+          <Typography variant="h6">
+            Post-filter Script{" "}
+            {data.length > 0 ? "(Clear dataset to enable changes)" : ""}
+          </Typography>
+          <CodeMirror
             value={postfilterScript}
-            onChange={(e) => setPostfilterScript(e.target.value)}
-            variant="outlined"
-            onInput={(e) => {
-              const target = e.target as HTMLTextAreaElement;
-              target.style.height = "auto"; // Reset height to auto to calculate the new height
-              target.style.height = `${target.scrollHeight}px`; // Set height to match content
-            }}
-            disabled={data.length > 0} // Disable when data is loaded
+            extensions={[javascript()]}
+            theme={oneDark}
+            onChange={(value) => setPostfilterScript(value)}
+            readOnly={data.length > 0}
           />
           <Stack direction="row" spacing={2}>
             <Button variant="contained" component="label">

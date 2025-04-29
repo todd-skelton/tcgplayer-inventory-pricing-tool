@@ -9,6 +9,8 @@
     "typecheck": "react-router typegen && tsc"
   },
   "dependencies": {
+    "@codemirror/lang-javascript": "^6.2.3",
+    "@codemirror/theme-one-dark": "^6.1.2",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@fontsource/roboto": "^5.2.5",
@@ -16,6 +18,7 @@
     "@mui/material": "^7.0.2",
     "@react-router/node": "^7.5.2",
     "@react-router/serve": "^7.5.2",
+    "@uiw/react-codemirror": "^4.23.11",
     "isbot": "^5.1.17",
     "papaparse": "^5.5.2",
     "react": "^19.0.0",
