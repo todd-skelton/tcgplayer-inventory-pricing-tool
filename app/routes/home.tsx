@@ -323,10 +323,7 @@ export default function Home() {
     250
   );
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [scriptsVisible, setScriptsVisible] = useLocalStorageState(
-    "scriptsVisible",
-    true
-  );
+  const [scriptsVisible, setScriptsVisible] = useState(true);
 
   const toggleScriptsVisibility = () => {
     setScriptsVisible((prev) => !prev);
