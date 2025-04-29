@@ -22,6 +22,8 @@ import {
   Toolbar,
 } from "@mui/material";
 import ImageIcon from "@mui/icons-material/Image";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import Papa from "papaparse";
 import { useLocalStorageState } from "~/hooks/useLocalStorageState";
 import CodeMirror from "@uiw/react-codemirror";
@@ -321,6 +323,14 @@ export default function Home() {
     250
   );
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [scriptsVisible, setScriptsVisible] = useLocalStorageState(
+    "scriptsVisible",
+    true
+  );
+
+  const toggleScriptsVisibility = () => {
+    setScriptsVisible((prev) => !prev);
+  };
 
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
@@ -343,6 +353,7 @@ export default function Home() {
 
   const handleClearDataset = () => {
     setData([]);
+    setScriptsVisible(true);
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -367,6 +378,7 @@ export default function Home() {
           if (fileInputRef.current) {
             fileInputRef.current.value = "";
           }
+          setScriptsVisible(false);
         },
       });
     }
@@ -430,6 +442,7 @@ export default function Home() {
     setCalculationScript(defaultCalculationScript);
     setPrefilterScript(defaultPrefilterScript);
     setPostfilterScript(defaultPostfilterScript);
+    setScriptsVisible(true);
     setData([]);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -471,39 +484,43 @@ export default function Home() {
       </AppBar>
       <Container sx={{ alignSelf: "center" }}>
         <Stack spacing={2}>
-          <Typography variant="h6">
-            Pre-filter Script{" "}
-            {data.length > 0 ? "(Clear dataset to enable changes)" : ""}
-          </Typography>
-          <CodeMirror
-            value={prefilterScript}
-            extensions={[javascript()]}
-            theme={oneDark}
-            onChange={(value) => setPrefilterScript(value)}
-            readOnly={data.length > 0}
-          />
-          <Typography variant="h6">
-            Calculation Script{" "}
-            {data.length > 0 ? "(Clear dataset to enable changes)" : ""}
-          </Typography>
-          <CodeMirror
-            value={calculationScript}
-            extensions={[javascript()]}
-            theme={oneDark}
-            onChange={(value) => setCalculationScript(value)}
-            readOnly={data.length > 0}
-          />
-          <Typography variant="h6">
-            Post-filter Script{" "}
-            {data.length > 0 ? "(Clear dataset to enable changes)" : ""}
-          </Typography>
-          <CodeMirror
-            value={postfilterScript}
-            extensions={[javascript()]}
-            theme={oneDark}
-            onChange={(value) => setPostfilterScript(value)}
-            readOnly={data.length > 0}
-          />
+          {scriptsVisible && (
+            <>
+              <Typography variant="h6">
+                Pre-filter Script{" "}
+                {data.length > 0 ? "(Clear dataset to enable changes)" : ""}
+              </Typography>
+              <CodeMirror
+                value={prefilterScript}
+                extensions={[javascript()]}
+                theme={oneDark}
+                onChange={(value) => setPrefilterScript(value)}
+                readOnly={data.length > 0}
+              />
+              <Typography variant="h6">
+                Calculation Script{" "}
+                {data.length > 0 ? "(Clear dataset to enable changes)" : ""}
+              </Typography>
+              <CodeMirror
+                value={calculationScript}
+                extensions={[javascript()]}
+                theme={oneDark}
+                onChange={(value) => setCalculationScript(value)}
+                readOnly={data.length > 0}
+              />
+              <Typography variant="h6">
+                Post-filter Script{" "}
+                {data.length > 0 ? "(Clear dataset to enable changes)" : ""}
+              </Typography>
+              <CodeMirror
+                value={postfilterScript}
+                extensions={[javascript()]}
+                theme={oneDark}
+                onChange={(value) => setPostfilterScript(value)}
+                readOnly={data.length > 0}
+              />
+            </>
+          )}
           <Stack direction="row" spacing={2}>
             <Button variant="contained" component="label">
               Upload Inventory Export
@@ -528,6 +545,15 @@ export default function Home() {
               onClick={handleClearDataset} // Call the clear dataset handler
             >
               Clear Dataset
+            </Button>
+            <Button
+              color="inherit"
+              onClick={toggleScriptsVisibility}
+              startIcon={
+                scriptsVisible ? <VisibilityOffIcon /> : <VisibilityIcon />
+              }
+            >
+              {scriptsVisible ? "Hide Scripts" : "Show Scripts"}
             </Button>
           </Stack>
         </Stack>
