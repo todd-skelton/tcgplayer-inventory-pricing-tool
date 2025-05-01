@@ -1,3 +1,4 @@
+import React from "react";
 import {
   isRouteErrorResponse,
   Links,
@@ -11,6 +12,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 
 import type { Route } from "./+types/root";
+import { useMediaQuery } from "@mui/material";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -25,13 +27,23 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
-const darkTheme = createTheme({
-  palette: {
-    mode: "dark",
-  },
-});
+function usePreferredTheme() {
+  const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
+
+  return React.useMemo(
+    () =>
+      createTheme({
+        palette: {
+          mode: prefersDarkMode ? "dark" : "light",
+        },
+      }),
+    [prefersDarkMode]
+  );
+}
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  const theme = usePreferredTheme();
+
   return (
     <html lang="en">
       <head>
@@ -41,7 +53,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <ThemeProvider theme={darkTheme}>
+        <ThemeProvider theme={theme}>
           <CssBaseline />
           {children}
         </ThemeProvider>

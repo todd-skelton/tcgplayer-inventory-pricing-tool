@@ -28,7 +28,6 @@ import Papa from "papaparse";
 import { useLocalStorageState } from "~/hooks/useLocalStorageState";
 import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
-import { oneDark } from "@codemirror/theme-one-dark";
 
 interface TCGData {
   "TCGplayer Id": string;
@@ -490,7 +489,7 @@ export default function Home() {
               <CodeMirror
                 value={prefilterScript}
                 extensions={[javascript()]}
-                theme={oneDark}
+                theme={theme.palette.mode}
                 onChange={(value) => setPrefilterScript(value)}
                 readOnly={data.length > 0}
               />
@@ -501,7 +500,7 @@ export default function Home() {
               <CodeMirror
                 value={calculationScript}
                 extensions={[javascript()]}
-                theme={oneDark}
+                theme={theme.palette.mode}
                 onChange={(value) => setCalculationScript(value)}
                 readOnly={data.length > 0}
               />
@@ -512,7 +511,7 @@ export default function Home() {
               <CodeMirror
                 value={postfilterScript}
                 extensions={[javascript()]}
-                theme={oneDark}
+                theme={theme.palette.mode}
                 onChange={(value) => setPostfilterScript(value)}
                 readOnly={data.length > 0}
               />
