@@ -302,9 +302,43 @@ function applyPriceScript(row: TCGData, calculationScript: string): TCGData {
   };
 }
 
+function updateTotals(totals: any, row: TCGData): any {
+  // Update running totals
+  const quantity = parseFloat(row["Total Quantity"]) || 0;
+  totals.totalQuantity += quantity;
+  totals.tcgMarketPrice += quantity * parseFloat(row["TCG Market Price"]) || 0;
+  totals.tcgLowPriceWithShipping +=
+    quantity * parseFloat(row["TCG Low Price With Shipping"]) || 0;
+  totals.tcgLowPrice += totals * parseFloat(row["TCG Low Price"]) || 0;
+  totals.tcgDirectLow += quantity * parseFloat(row["TCG Direct Low"]) || 0;
+  totals.tcgMarketplacePrice +=
+    quantity * parseFloat(row["TCG Marketplace Price"]) || 0;
+  totals.tcgCurrentPrice += quantity * parseFloat(row["Current Price"]) || 0;
+
+  return totals;
+}
+
+function finalizeTotals(totals: any): any {
+  totals.totalChange = totals.tcgMarketplacePrice - totals.tcgCurrentPrice;
+  totals.totalChangeFromMarket =
+    totals.tcgMarketplacePrice - totals.tcgMarketPrice;
+  return totals;
+}
+
 export default function Home() {
   const theme = useTheme();
   const [data, setData] = useState<TCGData[]>([]);
+  const [totals, setTotals] = useState({
+    totalQuantity: 0,
+    tcgMarketPrice: 0,
+    tcgLowPriceWithShipping: 0,
+    tcgLowPrice: 0,
+    tcgDirectLow: 0,
+    tcgMarketplacePrice: 0,
+    tcgCurrentPrice: 0,
+    totalChange: 0,
+    totalChangeFromMarket: 0,
+  });
   const [calculationScript, setCalculationScript] =
     useLocalStorageState<string>("calculationScript", defaultCalculationScript);
   const [prefilterScript, setPrefilterScript] = useLocalStorageState<string>(
@@ -356,6 +390,17 @@ export default function Home() {
     const file = event.target.files?.[0];
     if (file) {
       const newData: TCGData[] = [];
+      const runningTotals = {
+        totalQuantity: 0,
+        tcgMarketPrice: 0,
+        tcgLowPriceWithShipping: 0,
+        tcgLowPrice: 0,
+        tcgDirectLow: 0,
+        tcgMarketplacePrice: 0,
+        tcgCurrentPrice: 0,
+        totalChange: 0,
+        totalChangeFromMarket: 0,
+      };
       Papa.parse<TCGData>(file, {
         header: true,
         skipEmptyLines: true,
@@ -365,12 +410,17 @@ export default function Home() {
 
           const newPrice = applyPriceScript(parsedRow, calculationScript);
 
+          updateTotals(runningTotals, newPrice);
+
           if (!postfiltered(postfilterScript, newPrice)) return;
 
           newData.push(newPrice);
         },
         complete: () => {
+          finalizeTotals(runningTotals);
+          setPage(0);
           setData(newData);
+          setTotals(runningTotals);
           if (fileInputRef.current) {
             fileInputRef.current.value = "";
           }
@@ -379,44 +429,6 @@ export default function Home() {
       });
     }
   };
-
-  const calculateTotals = () => {
-    const totals = {
-      totalQuantity: 0,
-      tcgMarketPrice: 0,
-      tcgLowPriceWithShipping: 0,
-      tcgLowPrice: 0,
-      tcgDirectLow: 0,
-      tcgMarketplacePrice: 0,
-      tcgCurrentPrice: 0,
-      totalChange: 0,
-      totalChangeFromMarket: 0,
-    };
-
-    data.forEach((row) => {
-      const quantity = parseFloat(row["Total Quantity"]) || 0;
-      totals.totalQuantity += quantity;
-      totals.tcgMarketPrice +=
-        quantity * parseFloat(row["TCG Market Price"]) || 0;
-      totals.tcgLowPriceWithShipping +=
-        quantity * parseFloat(row["TCG Low Price With Shipping"]) || 0;
-      totals.tcgLowPrice += quantity * parseFloat(row["TCG Low Price"]) || 0;
-      totals.tcgDirectLow += quantity * parseFloat(row["TCG Direct Low"]) || 0;
-      totals.tcgMarketplacePrice +=
-        quantity * parseFloat(row["TCG Marketplace Price"]) || 0;
-      totals.tcgCurrentPrice +=
-        quantity * parseFloat(row["Current Price"]) || 0;
-    });
-
-    // Calculate totalChange
-    totals.totalChange = totals.tcgMarketplacePrice - totals.tcgCurrentPrice;
-    totals.totalChangeFromMarket =
-      totals.tcgMarketplacePrice - totals.tcgMarketPrice;
-
-    return totals;
-  };
-
-  const totals = React.useMemo(() => calculateTotals(), [data]);
 
   const handleDownloadCSV = () => {
     const filteredData = data.map(
