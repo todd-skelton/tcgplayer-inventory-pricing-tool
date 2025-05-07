@@ -6,44 +6,32 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useNavigate,
 } from "react-router";
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Stack,
+  Tooltip,
+  IconButton,
+} from "@mui/material";
+import HomeIcon from "@mui/icons-material/Home";
+import HelpIcon from "@mui/icons-material/Help";
 import type { Route } from "./+types/root";
-import { useMediaQuery } from "@mui/material";
 
-export const links: Route.LinksFunction = () => [
-  { rel: "preconnect", href: "https://fonts.googleapis.com" },
-  {
-    rel: "preconnect",
-    href: "https://fonts.gstatic.com",
-    crossOrigin: "anonymous",
+const theme = createTheme({
+  cssVariables: true,
+  colorSchemes: {
+    dark: true,
   },
-  {
-    rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
-  },
-];
-
-function usePreferredTheme() {
-  const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
-
-  return React.useMemo(
-    () =>
-      createTheme({
-        palette: {
-          mode: prefersDarkMode ? "dark" : "light",
-        },
-      }),
-    [prefersDarkMode]
-  );
-}
+});
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const theme = usePreferredTheme();
-
+  const navigate = useNavigate();
   return (
     <html lang="en">
       <head>
@@ -55,7 +43,33 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <body>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          {children}
+          <Stack spacing={2}>
+            <AppBar position="static">
+              <Toolbar>
+                <Stack direction="row" sx={{ flexGrow: 1 }} spacing={2}>
+                  <Typography variant="h6">
+                    TCGplayer Inventory Pricing Tool
+                  </Typography>
+                </Stack>
+                <Stack direction="row" spacing={2}>
+                  <Tooltip title="Home">
+                    <IconButton color="inherit" onClick={() => navigate("/")}>
+                      <HomeIcon />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Help">
+                    <IconButton
+                      color="inherit"
+                      onClick={() => navigate("/help")}
+                    >
+                      <HelpIcon />
+                    </IconButton>
+                  </Tooltip>
+                </Stack>
+              </Toolbar>
+            </AppBar>
+            {children}
+          </Stack>
         </ThemeProvider>
         <ScrollRestoration />
         <Scripts />
