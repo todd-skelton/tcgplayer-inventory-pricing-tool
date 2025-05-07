@@ -112,12 +112,7 @@ export default function Home() {
           >
             Save Scripts
           </Button>
-          <Button
-            color="inherit"
-            component="label"
-            startIcon={<UploadIcon />}
-            onClick={handleSaveSettings}
-          >
+          <Button color="inherit" component="label" startIcon={<UploadIcon />}>
             Load Scripts
             <input
               type="file"
