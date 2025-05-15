@@ -1,4 +1,4 @@
-import { completeFromList, type Completion } from "@codemirror/autocomplete";
+import { completeFromList } from "@codemirror/autocomplete";
 import type { Autocompletion } from "../Autocompletion.type";
 import type { Inventory } from "../Inventory.type";
 import { roundTo } from "~/utilities/math";
@@ -50,7 +50,6 @@ export interface ListingTotals {
   tcgLowPriceWithShipping: number;
   tcgLowPrice: number;
   totalQuantity: number;
-  addToQuantity: number;
   tcgMarketplacePrice: number;
   currentMarketplacePrice: number;
 }
@@ -69,7 +68,6 @@ export const initializeListingTotals = (): ListingTotals => ({
   tcgDirectLow: 0,
   tcgMarketplacePrice: 0,
   currentMarketplacePrice: 0,
-  addToQuantity: 0,
 });
 
 export const defaultListingInventory: ListingInventory = {
@@ -127,26 +125,25 @@ export const updateListingTotals = (
   totals: ListingTotals,
   listing: Listing
 ): void => {
-  totals.tcgMarketPrice += isNaN(listing.tcgMarketPrice)
-    ? 0
-    : listing.tcgMarketPrice;
-  totals.tcgDirectLow += isNaN(listing.tcgDirectLow) ? 0 : listing.tcgDirectLow;
-  totals.tcgLowPriceWithShipping += isNaN(listing.tcgLowPriceWithShipping)
-    ? 0
-    : listing.tcgLowPriceWithShipping;
-  totals.tcgLowPrice += isNaN(listing.tcgLowPrice) ? 0 : listing.tcgLowPrice;
-  totals.totalQuantity += isNaN(listing.totalQuantity)
-    ? 0
-    : listing.totalQuantity;
-  totals.addToQuantity += isNaN(listing.addToQuantity)
-    ? 0
-    : listing.addToQuantity;
-  totals.tcgMarketplacePrice += isNaN(listing.tcgMarketplacePrice)
-    ? 0
-    : listing.tcgMarketplacePrice;
-  totals.currentMarketplacePrice += isNaN(listing.currentMarketplacePrice)
-    ? 0
-    : listing.currentMarketplacePrice;
+  const quantity = listing.totalQuantity || 0 + listing.addToQuantity || 0;
+
+  totals.tcgMarketPrice += listing.tcgMarketPrice || 0 * quantity;
+
+  totals.tcgDirectLow += listing.tcgDirectLow || 0 * quantity;
+
+  totals.tcgLowPriceWithShipping +=
+    listing.tcgLowPriceWithShipping || 0 * quantity;
+
+  totals.tcgLowPrice += listing.tcgLowPrice || 0 * quantity;
+
+  totals.totalQuantity += listing.totalQuantity || 0;
+
+  totals.totalQuantity += listing.addToQuantity || 0;
+
+  totals.tcgMarketplacePrice += listing.tcgMarketplacePrice || 0 * quantity;
+
+  totals.currentMarketplacePrice +=
+    listing.currentMarketplacePrice || 0 * quantity;
 };
 
 export const filteredListing = (

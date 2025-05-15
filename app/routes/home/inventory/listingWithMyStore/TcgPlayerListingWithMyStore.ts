@@ -109,13 +109,11 @@ export const updateListingWithMyStoreTotals = (
   listing: ListingWithMyStore
 ): void => {
   updateListingTotals(totals, listing);
-  totals.myStoreReserveQuantity += isNaN(listing.myStoreReserveQuantity)
-    ? 0
-    : listing.myStoreReserveQuantity;
-  totals.myStorePrice += isNaN(listing.myStorePrice) ? 0 : listing.myStorePrice;
-  totals.currentMyStorePrice += isNaN(listing.currentMyStorePrice)
-    ? 0
-    : listing.currentMyStorePrice;
+  const myStoryQuantity = listing.myStoreReserveQuantity || 0;
+  totals.myStoreReserveQuantity += myStoryQuantity;
+  totals.myStorePrice += listing.myStorePrice || 0 * myStoryQuantity;
+  totals.currentMyStorePrice +=
+    listing.currentMyStorePrice || 0 * myStoryQuantity;
 };
 
 export const mapListingToTcgPlayerListingWithMyStore = (

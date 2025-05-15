@@ -193,6 +193,7 @@ export default function ListingsWithMyStore() {
                   currentMarketplacePrice,
                   tcgMarketPrice,
                   totalQuantity,
+                  addToQuantity,
                   currentMyStorePrice,
                   myStorePrice,
                 }) => {
@@ -233,7 +234,7 @@ export default function ListingsWithMyStore() {
                         format={currencyFormatter}
                       />
                       <NumberFormattedTableCell
-                        value={totalQuantity}
+                        value={totalQuantity + addToQuantity}
                         format={quantityFormatter}
                       />
                       <NumberFormattedTableCell

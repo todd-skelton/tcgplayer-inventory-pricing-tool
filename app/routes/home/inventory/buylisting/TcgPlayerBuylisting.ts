@@ -113,27 +113,13 @@ export const updateBuylistingTotals = (
   totals: BuylistingTotals,
   buylisting: Buylisting
 ): void => {
-  totals.buylistMarketPrice += isNaN(buylisting.buylistMarketPrice)
-    ? 0
-    : buylisting.buylistMarketPrice;
-  totals.buylistHighPrice += isNaN(buylisting.buylistHighPrice)
-    ? 0
-    : buylisting.buylistHighPrice;
-  totals.buylistQuantity += isNaN(buylisting.buylistQuantity)
-    ? 0
-    : buylisting.buylistQuantity;
-  totals.addToBuylistQuantity += isNaN(buylisting.addToBuylistQuantity)
-    ? 0
-    : buylisting.addToBuylistQuantity;
-  totals.myBuylistPrice += isNaN(buylisting.myBuylistPrice)
-    ? 0
-    : buylisting.myBuylistPrice;
-  totals.pendingPurchaseQuantity += isNaN(buylisting.pendingPurchaseQuantity)
-    ? 0
-    : buylisting.pendingPurchaseQuantity;
-  totals.currentBuylistPrice += isNaN(buylisting.currentBuylistPrice)
-    ? 0
-    : buylisting.currentBuylistPrice;
+  totals.buylistMarketPrice += buylisting.buylistMarketPrice || 0;
+  totals.buylistHighPrice += buylisting.buylistHighPrice || 0;
+  totals.buylistQuantity += buylisting.buylistQuantity || 0;
+  totals.addToBuylistQuantity += buylisting.addToBuylistQuantity || 0;
+  totals.myBuylistPrice += buylisting.myBuylistPrice || 0;
+  totals.pendingPurchaseQuantity += buylisting.pendingPurchaseQuantity || 0;
+  totals.currentBuylistPrice += buylisting.currentBuylistPrice || 0;
 };
 
 export const mapBuylistingToTcgPlayerBuylisting = (

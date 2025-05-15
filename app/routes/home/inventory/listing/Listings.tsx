@@ -149,6 +149,7 @@ export default function Listings() {
                   tcgLowPrice,
                   tcgLowPriceWithShipping,
                   totalQuantity,
+                  addToQuantity,
                 }) => {
                   const priceDifference =
                     tcgMarketplacePrice - currentMarketplacePrice;
@@ -187,7 +188,7 @@ export default function Listings() {
                         format={currencyFormatter}
                       />
                       <NumberFormattedTableCell
-                        value={totalQuantity}
+                        value={totalQuantity + addToQuantity}
                         format={quantityFormatter}
                       />
                       <NumberFormattedTableCell
