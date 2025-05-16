@@ -31,19 +31,12 @@ export default function TableHeaderWithSummary({
     );
   }
 
-  const theme = useTheme();
-
-  const color =
-    value > 0
-      ? theme.palette.success.main
-      : value < 0
-      ? theme.palette.error.main
-      : theme.palette.text.primary;
+  const color = value > 0 ? "success" : value < 0 ? "error" : "textPrimary";
 
   return (
     <TableCell align="right" sx={{ width: "0%" }}>
       {header}
-      <Typography variant="body2" style={{ color }}>
+      <Typography variant="body2" color={color}>
         {format.format(value)}
       </Typography>
     </TableCell>
