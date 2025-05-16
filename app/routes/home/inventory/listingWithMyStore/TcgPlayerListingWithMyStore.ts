@@ -73,7 +73,12 @@ export const filteredListing = (
   listing: ListingWithMyStore
 ): boolean => {
   try {
-    const func = new Function("listing", `with (listing) { ${filterScript} }`);
+    const func = new Function(
+      "listing",
+      `with (listing) { 
+      ${filterScript} 
+      }`
+    );
     return func(listing);
   } catch (error) {
     console.error("Error in filter script:", error);
@@ -94,7 +99,12 @@ export const updateListingWithMyStore = (
   listing: ListingWithMyStore
 ): void => {
   try {
-    const func = new Function("listing", `with (listing) { ${script} }`);
+    const func = new Function(
+      "listing",
+      `with (listing) { 
+      ${script} 
+      }`
+    );
     func(listing);
     normalizeListingWithMyStore(listing);
   } catch (error) {

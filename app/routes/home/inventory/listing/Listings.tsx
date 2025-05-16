@@ -50,7 +50,7 @@ tcgMarketplacePrice = Math.max(tcgLowPrice * percent, floor);
 else tcgMarketplacePrice = currentMarketplacePrice;`;
 
 export const defaultPostfilterScript = `// help: remove anything without a price change
-return tcgMarketplacePrice !== currentMarketplacePrice;`;
+return tcgMarketplacePrice !== currentMarketplacePrice || addToQuantity > 0;`;
 
 export default function Listings() {
   return (

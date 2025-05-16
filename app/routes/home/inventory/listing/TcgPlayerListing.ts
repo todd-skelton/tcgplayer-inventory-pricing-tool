@@ -151,7 +151,12 @@ export const filteredListing = (
   listing: Listing
 ): boolean => {
   try {
-    const func = new Function("listing", `with (listing) { ${filterScript} }`);
+    const func = new Function(
+      "listing",
+      `with (listing) { 
+      ${filterScript} 
+      }`
+    );
     return func(listing);
   } catch (error) {
     console.error("Error in filter script:", error);
@@ -173,7 +178,12 @@ export const normalizeListing = (listing: Listing): void => {
 
 export const updateListing = (script: string, listing: Listing): void => {
   try {
-    const func = new Function("listing", `with (listing) { ${script} }`);
+    const func = new Function(
+      "listing",
+      `with (listing) { 
+      ${script} 
+      }`
+    );
     func(listing);
     normalizeListing(listing);
   } catch (error) {
