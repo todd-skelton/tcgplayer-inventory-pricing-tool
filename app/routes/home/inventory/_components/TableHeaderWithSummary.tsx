@@ -1,4 +1,4 @@
-import { TableCell, Typography, useTheme } from "@mui/material";
+import { TableCell, Typography } from "@mui/material";
 
 export type TableHeaderWithSummaryProps = {
   header: string;

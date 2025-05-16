@@ -1,5 +1,4 @@
 import { TableCell } from "@mui/material";
-import ImageIcon from "@mui/icons-material/Image";
 
 export type NoWrapTableCellProps = {
   maxWidth?: string;
